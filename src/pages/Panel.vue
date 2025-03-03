@@ -36,6 +36,7 @@ import { asString, fetchUrls } from '@/libs/utils';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { marked } from 'marked';
 import HijackedATag from '@/components/HijackedATag.vue';
+import { Menu } from '@/components/MenuView.vue';
 
 const { config, loadConfig, saveConfig } = useConfig();
 const { generating, generatedContent, userPrompt, generateText } =
@@ -96,17 +97,6 @@ const handlePageChange = (page: PanelPage) => {
     } else {
         userPrompt.value = '';
     }
-};
-
-export type Menu = {
-    key: string;
-    label: string;
-    description: string;
-    action: () => void;
-    isSub?: boolean;
-    autoClose?: boolean;
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    icon: any;
 };
 
 const hasContent = computed(() => content.value.trim().length > 0);
@@ -173,7 +163,6 @@ const menus = computed<Menu[]>((): Menu[] => {
                       update(content.value);
                       hideWindow();
                   },
-                  autoClose: true,
                   icon: SolarTextBoldDuotone,
               }
             : null,
@@ -301,9 +290,6 @@ function executeMenu(key: string) {
     const menu = menus.value.find(menu => menu.key === key);
     if (menu) {
         menu.action();
-        if (menu.autoClose) {
-            hideWindow();
-        }
     }
 }
 
