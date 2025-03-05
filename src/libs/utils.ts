@@ -54,20 +54,20 @@ export function debounce<T extends (...args: any[]) => any>(fn: T, delay = 300) 
 export function convertDatetime(utcDatetime: string) {
     const regex = /(\d{4}-\d{2}-\d{2})\s+(\d{1,2}):(\d{2}):(\d{2})\.(\d{3})\s+([+-]\d{2}):(\d{2}):(\d{2})/;
     const match = utcDatetime.match(regex);
-    
+
     if (!match) {
         return "100年内";
     }
-    
+
     const [, datePart, hours, minutes, seconds, milliseconds, tzHours, tzMinutes] = match;
-    
+
     const isoDateString = `${datePart}T${hours.padStart(2, '0')}:${minutes}:${seconds}.${milliseconds}${tzHours}:${tzMinutes}`;
-    
+
     const date = new Date(isoDateString);
-    if (isNaN(date.getTime())) {
+    if (Number.isNaN(date.getTime())) {
         return "100年内";
     }
-    
+
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffSeconds = Math.floor(diffMs / 1000);
@@ -76,18 +76,21 @@ export function convertDatetime(utcDatetime: string) {
     const diffDays = Math.floor(diffHours / 24);
     const diffMonths = Math.floor(diffDays / 30);
     const diffYears = Math.floor(diffDays / 365);
-    
+
     if (diffSeconds < 60) {
         return "刚刚";
-    } else if (diffMinutes < 60) {
-        return `${diffMinutes} 分钟前`;
-    } else if (diffHours < 24) {
-        return `${diffHours} 小时前`;
-    } else if (diffDays < 30) {
-        return `${diffDays} 天前`;
-    } else if (diffMonths < 12) {
-        return `${diffMonths} 个月前`;
-    } else {
-        return `${diffYears} 年前`;
     }
+    if (diffMinutes < 60) {
+        return `${diffMinutes} 分钟前`;
+    }
+    if (diffHours < 24) {
+        return `${diffHours} 小时前`;
+    }
+    if (diffDays < 30) {
+        return `${diffDays} 天前`;
+    }
+    if (diffMonths < 12) {
+        return `${diffMonths} 个月前`;
+    }
+    return `${diffYears} 年前`;
 }

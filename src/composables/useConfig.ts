@@ -13,7 +13,6 @@ export interface AIConfig {
     corsCompatiable?: boolean;
     enableToJson: boolean;
     enableAskAI: boolean;
-    enableAICreation: boolean;
     enableAIChat: boolean;
     enableAISnipets: boolean;
     persistChatHistory: boolean;
@@ -69,7 +68,6 @@ export function useConfig() {
             corsCompatiable: false,
             enableToJson: true,
             enableAskAI: true,
-            enableAICreation: true,
             enableAIChat: true,
             enableAISnipets: true,
             persistChatHistory: false,
@@ -111,7 +109,6 @@ export function useConfig() {
                 corsCompatiable: !!(await store.get('ai.corsCompatiable') ?? false),
                 enableToJson: !!(await store.get('ai.enableToJson') ?? true),
                 enableAskAI: !!(await store.get('ai.enableAskAI') ?? true),
-                enableAICreation: !!(await store.get('ai.enableAICreation') ?? true),
                 enableAIChat: !!(await store.get('ai.enableAIChat') ?? true),
                 enableAISnipets: !!(await store.get('ai.enableAISnipets') ?? true),
                 persistChatHistory: !!(await store.get('ai.persistChatHistory')),
@@ -160,7 +157,6 @@ export function useConfig() {
         await store.set('ai.corsCompatiable', config.value.ai.corsCompatiable);
         await store.set('ai.enableToJson', config.value.ai.enableToJson);
         await store.set('ai.enableAskAI', config.value.ai.enableAskAI);
-        await store.set('ai.enableAICreation', config.value.ai.enableAICreation);
         await store.set('ai.enableAIChat', config.value.ai.enableAIChat);
         await store.set('ai.enableAISnipets', config.value.ai.enableAISnipets);
         await store.set('ai.persistChatHistory', config.value.ai.persistChatHistory);

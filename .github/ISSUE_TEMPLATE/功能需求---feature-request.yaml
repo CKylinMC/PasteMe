@@ -1,0 +1,43 @@
+name: 🚀 功能需求 / Feature request
+description: 希望软件做到什么事情 / Suggest an idea for this project
+title: "[IDEA] 请描述一下你的功能"
+labels: ["enhancement"]
+assignees:
+  - CKylinMC
+
+body:
+  - type: textarea
+    id: problem-related
+    attributes:
+      label: 你的功能是否与某个问题有关？
+      description: 简明扼要地描述问题所在
+      placeholder: "例如：当[......]时软件不方便使用"
+    validations:
+      required: false
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: 描述你想要实现的功能或效果
+      description: 对您希望实现的功能的清晰而简洁的描述
+      placeholder: 详细描述你期望的功能...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternative-solutions
+    attributes:
+      label: 描述你考虑过的替代方案
+      description: 对您考虑过的任何替代解决方案或功能的清晰简洁的描述
+      placeholder: "例如：有此功能的其他软件"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: 其他信息
+      description: 在此处添加有关功能请求的任何其他信息或屏幕截图
+      placeholder: 补充说明...
+    validations:
+      required: false

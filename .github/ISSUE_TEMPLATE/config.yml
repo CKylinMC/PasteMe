@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ❓ 提问 / Ask questions
+    url: https://github.com/CKylinMC/PasteMe/discussions/new?category=%E9%97%AE%E7%AD%94
+    about: 向他人寻求帮助
+  - name: 💡 好点子 / Good ideas
+    url: https://github.com/CKylinMC/PasteMe/discussions/new?category=%E5%A5%BD%E7%82%B9%E5%AD%90
+    about: 不确定是否适合Issue的想法与建议
+  - name: ✨ 分享内容 / Share content
+    url: https://github.com/CKylinMC/PasteMe/discussions/new?category=%E5%B1%95%E7%A4%BA
+    about: 分享你的提示词等内容
+  - name: ⬇️ 下载最新版本
+    url: https://github.com/CKylinMC/PasteMe/releases/latest
+    about: 直达最新版本的下载地址

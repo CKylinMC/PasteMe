@@ -1,0 +1,103 @@
+name: 🪲 错误反馈 / Bug report
+description: 反馈软件错误 / Create a report to help us improve
+title: "[BUG] 请简单描述一下问题"
+labels: ["bug"]
+assignees:
+  - CKylinMC
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        <!--在开始之前，请先一句话简单且一目了然地描述一下你的问题，填写在上方标题处，感谢-->
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 描述问题 / Describe the bug
+      description: 请描述你发现软件存在的问题
+      placeholder: 详细描述问题内容...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce-steps
+    attributes:
+      label: 复现步骤 / To Reproduce
+      description: 描述复现问题的步骤
+      placeholder: |
+        1. 前往 '...' 界面
+        2. 点击 '....'
+        3. 滚动到 '....'
+        4. 看到问题
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: 预期行为 / Expected behavior
+      description: 描述一下你预期应该是什么行为，软件哪里与预期不同
+      placeholder: 软件应该如何工作...
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图 / Screenshots
+      description: 截图是了解问题的重要方式，请尽可能附带几张截图来辅助定位问题，注意给关键信息打码
+      placeholder: 可以拖拽图片到此处上传
+    validations:
+      required: false
+
+  - type: input
+    id: os-info
+    attributes:
+      label: 操作系统 / OS
+      description: 你使用的操作系统
+      placeholder: 例如：Win11 23H2 或者 WIN10等...
+    validations:
+      required: true
+
+  - type: input
+    id: input-method
+    attributes:
+      label: 输入法 / Input Method
+      description: 反馈有关输入问题时请附加输入法信息
+      placeholder: 例如：RIME
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / Version
+      description: 请填写所使用的软件版本
+      placeholder: 例如：v1.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: launch-method
+    attributes:
+      label: 启动方式 / Launch Method
+      description: 请选择软件的启动方式
+      options:
+        - 安装版启动(普通启动)
+        - 绿色版(管理员权限)启动
+        - 绿色版启动
+        - 绿色版开机自启动
+        - 安装版开机自启动
+        - 其他方式
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 其他信息 / Additional context
+      description: 如果你觉得有任何其他信息要说明，请在此处说明
+      placeholder: 其他补充信息...
+    validations:
+      required: false

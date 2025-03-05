@@ -1,4 +1,4 @@
-import { getStoreKey, JsonValue, setStoreKey } from "./bridges";
+import { getStoreKey, type JsonValue, setStoreKey } from "./bridges";
 
 /**
  * StoreBackend used to move the store impl to different backend without changing usages

@@ -2,13 +2,13 @@ import { ref, toRaw, unref } from 'vue';
 import { check, type Update, type DownloadEvent } from '@tauri-apps/plugin-updater';
 import { bytesToSize } from '@/libs/utils';
 
-export const enum UpdateStage {
+export enum UpdateStage {
     CHECK = 'check',
     DOWNLOAD = 'download',
     INSTALL = 'install'
 }
 
-export const enum UpdateType {
+export enum UpdateType {
     DEFAULT = 'default',
     INFO = 'info',
     SUCCESS = 'success',

@@ -36,6 +36,7 @@ import { asString, fetchUrls } from '@/libs/utils';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { marked } from 'marked';
 import HijackedATag from '@/components/HijackedATag.vue';
+import Toast from '@/components/Toast.vue';
 
 const { config, loadConfig, saveConfig } = useConfig();
 const { generating, generatedContent, userPrompt, generateText } =
@@ -48,6 +49,8 @@ const { page, showPreview, mouseInRange, gotoPage, setupWindowListeners } =
 const vFocus = {
     mounted: (el: HTMLElement) => el.focus(),
 };
+
+const toast = ref();
 
 const mainView = new webviewWindow.WebviewWindow('main', {
     url: '/',
@@ -74,13 +77,13 @@ const selectedUrl = ref('');
 
 // 可保存状态
 const savable = computed(() => {
-    return ['edit', 'tojson', 'askai', 'aicreate', 'snippets-ai'].includes(
+    return ['edit', 'tojson', 'askai', 'snippets-ai'].includes(
         page.value
     );
 });
 
 const handlePageChange = (page: PanelPage) => {
-    if (['askai', 'aicreate', 'snippets-ai'].includes(page)) {
+    if (page === 'snippets-ai') {
         useMarkdownRender.value = true;
     } else {
         useMarkdownRender.value = false;
@@ -171,9 +174,8 @@ const menus = computed<Menu[]>((): Menu[] => {
                   description: '重新复制为纯文本',
                   action: () => {
                       update(content.value);
-                      hideWindow();
+                      toast.value.sendToast('已替换剪贴板内容');
                   },
-                  autoClose: true,
                   icon: SolarTextBoldDuotone,
               }
             : null,
@@ -193,19 +195,9 @@ const menus = computed<Menu[]>((): Menu[] => {
             hasContent.value && config.value.ai.enableAskAI
                 ? {
                       key: 'askai',
-                      label: '询问AI...',
-                      description: '让AI帮忙处理',
+                      label: '修改或处理...',
+                      description: '让AI帮忙处理数据或询问有关问题',
                       action: () => gotoPage('askai', handlePageChange),
-                      isSub: true,
-                      icon: SolarLightbulbBoltLineDuotone,
-                  }
-                : null,
-            config.value.ai.enableAICreation
-                ? {
-                      key: 'aicreate',
-                      label: '使用AI创作...',
-                      description: '让AI帮忙创作',
-                      action: () => gotoPage('aicreate', handlePageChange),
                       isSub: true,
                       icon: SolarPen2LineDuotone,
                   }
@@ -316,8 +308,6 @@ function handleAIPageEnter() {
             startConvertToJson();
         } else if (page.value === 'askai') {
             startAskAI();
-        } else if (page.value === 'aicreate') {
-            startAICreate();
         }
     }
 }
@@ -333,7 +323,7 @@ watch(page, newPage => {
         const selector =
             newPage === 'edit'
                 ? '.edit-textarea'
-                : ['tojson', 'askai', 'aicreate'].includes(newPage)
+                : ['tojson', 'askai'].includes(newPage)
                 ? '.prompt-input'
                 : null;
         const focusInput = selector
@@ -486,7 +476,7 @@ function listenKeydown(e: KeyboardEvent) {
         }
     } else if (
         e.key === 'Enter' &&
-        ['tojson', 'askai', 'aicreate'].includes(page.value)
+        ['tojson', 'askai'].includes(page.value)
     ) {
         handleAIPageEnter();
         e.preventDefault();
@@ -535,6 +525,7 @@ const snippetFormOK = computed(() => {
 
 function saveSnippet() {
     if (!snippetFormOK.value) {
+        toast.value.sendToast('信息不完整');
         return;
     }
     if (currentSnippet.value.isNew) {
@@ -561,7 +552,7 @@ function saveSnippet() {
             };
         }
     }
-    saveConfig();
+    return saveConfig().then(() => toast.value.sendToast('保存片段成功'));
 }
 
 function deleteSnippet() {
@@ -571,7 +562,7 @@ function deleteSnippet() {
         );
         if (index >= 0) {
             config.value.snippets.splice(index, 1);
-            saveConfig();
+            saveConfig().then(() => toast.value.sendToast('已删除片段'));
         }
     }
     gotoPage('snippets', handlePageChange);
@@ -593,10 +584,15 @@ function clearTask() {
     generatedContent.value = '';
 }
 
-function createTask(system: string, prompt: string) {
+async function createTask(system: string, prompt: string) {
     clearTask();
     stopToken.value = new StopToken();
-    return generateText(system, prompt, stopToken.value);
+    try {
+        return await generateText(system, prompt, stopToken.value);
+    } catch (e) {
+        console.error(e);
+        toast.value.sendToast('AI 生成时遇到问题');
+    }
 }
 
 // AI 相关操作函数
@@ -611,16 +607,10 @@ const startAskAI = (presetPrompt?: string, text?: string) => {
     const prompt = presetPrompt ? presetPrompt : userPrompt.value;
     userPrompt.value = prompt;
     return createTask(
-        '你的任务是分析用户的剪贴板数据。使用用户的指令和剪贴板内容回答问题。',
+        '你的任务是分析用户的剪贴板数据。使用用户的指令和剪贴板内容进行修改、处理、续写或回答问题。不要使用markdown。',
         `用户指令:\n${prompt}\n\n剪贴板内容:\n${cliptext}\n\n输出:\n`
     );
 };
-
-const startAICreate = () =>
-    createTask(
-        '你的任务是基于用户的指令继续创作内容。使用用户的指令和剪贴板内容进行创作。',
-        `用户指令:\n${userPrompt.value}\n\n剪贴板内容:\n${content.value}\n\n输出:\n`
-    );
 
 // 保存操作处理
 function doSaveAction() {
@@ -628,13 +618,14 @@ function doSaveAction() {
         case 'edit':
             update(content.value);
             gotoPage('index', handlePageChange);
+            toast.value.sendToast('已替换剪贴板内容');
             break;
         case 'tojson':
         case 'askai':
-        case 'aicreate':
         case 'snippets-ai':
             update(generatedContent.value);
             gotoPage('index', handlePageChange);
+            toast.value.sendToast('已替换剪贴板内容');
             break;
     }
 }
@@ -682,7 +673,10 @@ onBeforeUnmount(() => {
             class="bg-neutral-500/10 dark:bg-black p-2"
             :class="[showPreview && hasContent ? 'h-[120px]' : 'h-[32px]']"
         >
-            <div data-tauri-drag-region class="text-gray-800 dark:text-gray-400 h-6 relative">
+            <div
+                data-tauri-drag-region
+                class="text-gray-800 dark:text-gray-400 h-6 relative"
+            >
                 <div
                     data-tauri-drag-region
                     class="cursor-move absolute top-1 left-1/2 -translate-x-1/2 w-10 h-2 rounded-lg bg-neutral-500 dark:bg-white/40"
@@ -754,8 +748,14 @@ onBeforeUnmount(() => {
             v-else-if="page === 'calc'"
             class="flex-1 overflow-y-auto thin-scrollbar p-3 animate-fade-up animate-once animate-duration-500 animate-ease-out"
         >
-            <div class="text-gray-900 dark:text-gray-200 text-lg font-bold mb-2">统计</div>
-            <div class="text-gray-900 dark:text-gray-400 space-y-1 grid grid-cols-2 gap-x-2">
+            <div
+                class="text-gray-900 dark:text-gray-200 text-lg font-bold mb-2"
+            >
+                统计
+            </div>
+            <div
+                class="text-gray-900 dark:text-gray-400 space-y-1 grid grid-cols-2 gap-x-2"
+            >
                 <div>字符总数:</div>
                 <div>{{ stats.totalChars }}</div>
                 <div>非空字符总数:</div>
@@ -800,7 +800,6 @@ onBeforeUnmount(() => {
             v-else-if="
                 page === 'tojson' ||
                 page === 'askai' ||
-                page === 'aicreate' ||
                 page === 'snippets-ai'
             "
             class="flex-1 shrink-0 size-full flex flex-col animate-fade-up animate-once animate-duration-500 animate-ease-out"
@@ -843,9 +842,7 @@ onBeforeUnmount(() => {
                 @click="
                     page === 'tojson'
                         ? startConvertToJson()
-                        : page === 'askai'
-                        ? startAskAI()
-                        : startAICreate()
+                        : startAskAI()
                 "
             >
                 生成
@@ -1030,6 +1027,7 @@ onBeforeUnmount(() => {
                 </div>
             </div>
         </div>
+        <Toast ref="toast" />
     </div>
 </template>
 

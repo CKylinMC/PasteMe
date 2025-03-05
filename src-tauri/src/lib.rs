@@ -5,11 +5,9 @@ use tauri::{AppHandle, Manager, Monitor, PhysicalPosition, Runtime};
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_store::StoreExt;
-use window_vibrancy::{apply_acrylic, apply_mica};
 
 use serde_json::json;
 
-// 定义默认的Panel窗口大小
 const DEFAULT_PANEL_WIDTH: i32 = 400;
 const DEFAULT_PANEL_HEIGHT: i32 = 476;
 
@@ -66,14 +64,6 @@ async fn set_key_to_store<R: Runtime>(
     Ok(())
 }
 
-fn show_window(app: &AppHandle) {
-    let windows = app.webview_windows();
-
-    let window = windows.values().next().expect("Sorry, no window found");
-    window.show().expect("Can't Show Window");
-    window.set_focus().expect("Can't Bring Window to Focus");
-}
-
 fn show_window_with_name(app: &AppHandle<tauri::Wry>, name: &str) {
     let windows = app.webview_windows();
 
@@ -107,9 +97,6 @@ fn show_window_with_name_and_position(app: &AppHandle<tauri::Wry>, pos: Physical
     }
 
     tauri::async_runtime::spawn(async move {
-        let panel_width = DEFAULT_PANEL_WIDTH;
-        let panel_height = DEFAULT_PANEL_HEIGHT;
-
         let mut current_monitor: Option<Monitor> = None;
         for monitor in monitors {
             let size = monitor.size();
@@ -131,6 +118,10 @@ fn show_window_with_name_and_position(app: &AppHandle<tauri::Wry>, pos: Physical
         }
 
         if let Some(monitor) = current_monitor {
+            let scale = monitor.scale_factor();
+            let panel_width = (DEFAULT_PANEL_WIDTH as f64 * scale) as i32;
+            let panel_height = (DEFAULT_PANEL_HEIGHT as f64 * scale) as i32;
+            
             let size = monitor.size();
             let position = monitor.position();
 
@@ -202,7 +193,6 @@ async fn reregister_panel_shortcut(app: tauri::AppHandle<tauri::Wry>) -> Result<
             let enigo = Enigo::new(&Settings::default());
             let mut location = PhysicalPosition::new(0, 0);
 
-            // 获取鼠标位置
             if let Ok(enigo) = enigo {
                 if let Ok(pos) = enigo.location() {
                     location = PhysicalPosition::new(pos.0 as i32, pos.1 as i32);
@@ -232,15 +222,6 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .setup(|app| {
-            let mainwindow = app.get_webview_window("main").unwrap();
-            let panelwindow = app.get_webview_window("context").unwrap();
-            apply_mica(mainwindow.clone(), Some(true))
-                .or_else(|_| apply_acrylic(mainwindow, Some((18, 18, 18, 125))))
-                .expect("unsupported");
-            apply_mica(panelwindow.clone(), Some(true))
-                .or_else(|_| apply_acrylic(panelwindow, Some((18, 18, 18, 125))))
-                .expect("unsupported");
-
             let handle = app.handle();
             let _ = tray::create_tray(handle);
 

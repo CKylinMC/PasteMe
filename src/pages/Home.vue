@@ -391,19 +391,8 @@ const updateSuffix =
                                 ></n-checkbox>
                             </template>
                             <n-thing
-                                title="启用咨询 AI 功能"
-                                description="启用基于剪贴板向 AI 提问功能"
-                            />
-                        </n-list-item>
-                        <n-list-item>
-                            <template #suffix>
-                                <n-checkbox
-                                    v-model:checked="config.ai.enableAICreation"
-                                ></n-checkbox>
-                            </template>
-                            <n-thing
-                                title="启用 AI 创作"
-                                description="启用预设的条件续写功能"
+                                title="启用修改或提问"
+                                description="基于剪贴板要求 AI 修改或提问"
                             />
                         </n-list-item>
                         <n-list-item>
@@ -414,7 +403,7 @@ const updateSuffix =
                             </template>
                             <n-thing
                                 title="启用快速 AI 片段"
-                                description="启用保存和复用自定义AI提示词片段"
+                                description="保存和复用自定义AI提示词片段"
                             />
                         </n-list-item>
                         <n-list-item>
@@ -425,7 +414,7 @@ const updateSuffix =
                             </template>
                             <n-thing
                                 title="启用 AI 聊天"
-                                description="启用基于剪贴板对话模式"
+                                description="基于剪贴板的对话模式"
                             />
                         </n-list-item>
                         <n-list-item>

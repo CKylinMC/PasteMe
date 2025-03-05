@@ -18,11 +18,10 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["tray-icon"] }
-tauri-plugin-opener = "2"
-window-vibrancy = "0.5.3"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+tauri = { version = "2.3.1", features = ["tray-icon"] }
+tauri-plugin-opener = "2.2.6"
+serde = { version = "1.0.218", features = ["derive"] }
+serde_json = "1.0.140"
 tauri-plugin-clipboard-manager = "2"
 tauri-plugin-store = "2"
 tauri-plugin-process = "2"
@@ -32,6 +31,6 @@ tauri-plugin-http = { version = "2", features = ["unsafe-headers"] }
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-autostart = "2"
 tauri-plugin-global-shortcut = "2"
-tauri-plugin-single-instance = "2"
-tauri-plugin-updater = "2"
+tauri-plugin-single-instance = "2.2.2"
+tauri-plugin-updater = "2.5.1"
 tauri-plugin-cors-fetch = "3.1.0"

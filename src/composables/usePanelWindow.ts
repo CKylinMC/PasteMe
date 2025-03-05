@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { window as appWindow } from '@tauri-apps/api';
 import type { useClipboard } from './useClipboard';
 
-export type PanelPage = 'index' | 'calc' | 'edit' | 'tojson' | 'askai' | 'aicreate' | 'snippets' | 'snippets-ai' | 'snippets-edit' | 'chat' | 'urls' | 'urls-actions';
+export type PanelPage = 'index' | 'calc' | 'edit' | 'tojson' | 'askai' | 'snippets' | 'snippets-ai' | 'snippets-edit' | 'chat' | 'urls' | 'urls-actions';
 
 export function usePanelWindow(clipboard: ReturnType<typeof useClipboard>) {
     const page = ref<PanelPage>('index');
@@ -12,7 +12,7 @@ export function usePanelWindow(clipboard: ReturnType<typeof useClipboard>) {
     const gotoPage = (targetPage: PanelPage, onPageChange?: (page: PanelPage) => void) => {
         page.value = targetPage;
         showPreview.value = targetPage === 'index' ||
-            ['tojson', 'askai', 'aicreate', 'snippets-ai'].includes(targetPage);
+            ['tojson', 'askai', 'snippets-ai'].includes(targetPage);
         onPageChange?.(targetPage);
     };
 

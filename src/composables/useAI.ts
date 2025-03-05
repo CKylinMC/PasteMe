@@ -259,6 +259,9 @@ export function useAI(config: Ref<Config>) {
                     break;
                 }
             }
+        } catch (e) {
+            // biome-ignore lint/complexity/noUselessCatch: <explanation>
+            throw e;
         } finally {
             generating.value = false;
         }
