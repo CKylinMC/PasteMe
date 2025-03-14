@@ -12,7 +12,7 @@ import {
     computed,
     toRaw,
 } from 'vue';
-import KeySelector from '@/components/KeySelector.vue';
+import KeySelector from '@/components/utils/KeySelector.vue';
 import { type Snippet, useConfig } from '@/composables/useConfig';
 import { useAutoStart } from '@/composables/useAutoStart';
 import QlementineIconsWindowsMinimize16 from '~icons/qlementine-icons/windows-minimize-16';
@@ -27,14 +27,14 @@ import ClipAIIcon from '@/assets/clipai_color.png';
 import { useUpdater } from '@/composables/useUpdater';
 import { asString, convertDatetime, debounce } from '@/libs/utils';
 import { marked } from 'marked';
-import HijackedATag from '@/components/HijackedATag.vue';
+import HijackedATag from '@/components/utils/HijackedATag.vue';
 import MdiPlus from '~icons/mdi/plus';
 import MdiPencil from '~icons/mdi/pencil';
 import MdiDelete from '~icons/mdi/delete';
 import MdiCheck from '~icons/mdi/check';
 import MdiFileDocumentEditOutline from '~icons/mdi/file-document-edit-outline';
 import MdiKeyboardBackspace from '~icons/mdi/keyboard-backspace';
-import Toast from '@/components/Toast.vue';
+import Toast from '@/components/utils/Toast.vue';
 
 const { config, loadConfig, saveConfig } = useConfig();
 const { autoStart, toggleAutoStart, refreshAutoStart } = useAutoStart();

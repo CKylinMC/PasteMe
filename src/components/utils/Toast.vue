@@ -22,6 +22,10 @@ function sendToast(text: string, duration = 3000) {
     }, duration);
 }
 
+export type Toast = {
+    sendToast: (text: string, duration?: number) => void;
+};
+
 defineExpose({
     sendToast,
 });

@@ -20,7 +20,7 @@ import { marked } from 'marked';
 import { asString } from '@/libs/utils';
 import type { Tool } from 'ai';
 import { useClipboard } from '@/composables/useClipboard';
-import HijackedATag from './HijackedATag.vue';
+import HijackedATag from './utils/HijackedATag.vue';
 
 const props = defineProps<{
     content: string;
