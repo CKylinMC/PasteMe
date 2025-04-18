@@ -1,22 +1,23 @@
 import { ref } from 'vue';
 import { window as appWindow } from '@tauri-apps/api';
-import type { useClipboard } from './useClipboard';
+// import type { useClipboard } from './useClipboard';
 
-export type PanelPage = 'index' | 'calc' | 'edit' | 'tojson' | 'askai' | 'snippets' | 'snippets-ai' | 'snippets-edit' | 'chat' | 'urls' | 'urls-actions';
+// export type PanelPage = 'index' | 'calc' | 'edit' | 'tojson' | 'askai' | 'snippets' | 'snippets-ai' | 'snippets-edit' | 'chat' | 'urls' | 'urls-actions';
 
-export function usePanelWindow(clipboard: ReturnType<typeof useClipboard>) {
-    const page = ref<PanelPage>('index');
-    const showPreview = ref(true);
+//clipboard: ReturnType<typeof useClipboard>
+export function usePanelWindow() {
+    // const page = ref<PanelPage>('index');
+    // const showPreview = ref(true);
     const mouseInRange = ref(false);
 
-    const gotoPage = (targetPage: PanelPage, onPageChange?: (page: PanelPage) => void) => {
-        page.value = targetPage;
-        showPreview.value = targetPage === 'index' ||
-            ['tojson', 'askai', 'snippets-ai'].includes(targetPage);
-        onPageChange?.(targetPage);
-    };
+    // const gotoPage = (targetPage: PanelPage, onPageChange?: (page: PanelPage) => void) => {
+    //     page.value = targetPage;
+    //     showPreview.value = targetPage === 'index' ||
+    //         ['tojson', 'askai', 'snippets-ai'].includes(targetPage);
+    //     onPageChange?.(targetPage);
+    // };
 
-    const setupWindowListeners = async (onHide: () => void, loadConfig?: ()=>Promise<void>) => {
+    const setupWindowListeners = async ({ onShow = () => { }, onHide = () => { } }: { onHide?: () => Promise<void> | void, onShow?: () => Promise<void> | void } = {}) => {
         const isBlured = ref(true);
         const listeners = await Promise.all([
             appWindow.getCurrentWindow().listen('tauri://blur', event => {
@@ -28,12 +29,13 @@ export function usePanelWindow(clipboard: ReturnType<typeof useClipboard>) {
             }),
             appWindow.getCurrentWindow().listen('tauri://focus', async () => {
                 if (isBlured.value) {
-                    showPreview.value = true;
-                    page.value = 'index';
-                    await Promise.all([
-                        loadConfig?.(),
-                        clipboard.refresh()
-                    ]);
+                    // showPreview.value = true;
+                    // page.value = 'index';
+                    // await Promise.all([
+                    //     loadConfig?.(),
+                    //     clipboard.refresh()
+                    // ]);
+                    onShow();
                     isBlured.value = false;
                 }
             })
@@ -47,10 +49,10 @@ export function usePanelWindow(clipboard: ReturnType<typeof useClipboard>) {
     };
 
     return {
-        page,
-        showPreview,
+        // page,
+        // showPreview,
         mouseInRange,
-        gotoPage,
+        // gotoPage,
         setupWindowListeners
     };
 }
