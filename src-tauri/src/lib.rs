@@ -1,7 +1,7 @@
 mod tray;
 
 use enigo::{Direction, Enigo, Key, Keyboard, Mouse, Settings};
-use tauri::{AppHandle, Manager, Monitor, PhysicalPosition, Runtime};
+use tauri::{AppHandle, Manager, PhysicalPosition, Runtime};
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_store::StoreExt;
@@ -10,6 +10,9 @@ use serde_json::json;
 
 const DEFAULT_PANEL_WIDTH: i32 = 400;
 const DEFAULT_PANEL_HEIGHT: i32 = 476;
+
+const DEFAULT_MAINWIN_WIDTH: i32 = 800;
+const DEFAULT_MAINWIN_HEIGHT: i32 = 600;
 
 #[tauri::command]
 async fn input_text(text: &str) -> Result<(), String> {
@@ -33,8 +36,7 @@ async fn get_key_from_store<R: Runtime>(
     key: String,
     fallback: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
-    let stores = app.store("store.bin");
-    let store = match stores {
+    let store = match app.store("store.bin") {
         Ok(store) => store,
         Err(_) => return Ok(fallback),
     };
@@ -54,8 +56,7 @@ async fn set_key_to_store<R: Runtime>(
     key: String,
     value: serde_json::Value,
 ) -> Result<(), String> {
-    let stores = app.store("store.bin");
-    let store = match stores {
+    let store = match app.store("store.bin") {
         Ok(store) => store,
         Err(_) => return Err("Failed to get store".to_string()),
     };
@@ -68,111 +69,80 @@ fn show_window_with_name(app: &AppHandle<tauri::Wry>, name: &str) {
     let windows = app.webview_windows();
 
     let window = windows.get(name).expect("Sorry, no window found");
+
+    if let Some(monitor) = window.current_monitor().expect("Can't get monitor") {
+        let scale = monitor.scale_factor();
+
+        let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
+            (DEFAULT_MAINWIN_WIDTH as f64 * scale) as u32,
+            (DEFAULT_MAINWIN_HEIGHT as f64 * scale) as u32,
+        )));
+    }
+
     window.show().expect("Can't Show Window");
     window.set_focus().expect("Can't Bring Window to Focus");
 }
 
 fn show_window_with_name_and_position(app: &AppHandle<tauri::Wry>, pos: PhysicalPosition<i32>) {
-    let windows = app.webview_windows();
-    let window = match windows.get("context") {
+    let window = match app.webview_windows().get("context") {
         Some(win) => win.clone(),
         None => return,
     };
 
-    let monitors = match window.available_monitors() {
-        Ok(m) => m,
-        Err(_) => {
-            let _ = window.center();
-            let _ = window.show();
-            let _ = window.set_focus();
-            return;
-        }
-    };
+    let current_monitor = window.current_monitor().expect("Can't get monitor");
 
-    if monitors.is_empty() {
-        let _ = window.center();
-        let _ = window.show();
-        let _ = window.set_focus();
-        return;
+    if let Some(monitor) = current_monitor {
+        let scale = monitor.scale_factor();
+        let panel_width = (DEFAULT_PANEL_WIDTH as f64 * scale) as i32;
+        let panel_height = (DEFAULT_PANEL_HEIGHT as f64 * scale) as i32;
+
+        let size = monitor.size();
+        let position = monitor.position();
+
+        let monitor_x = position.x;
+        let monitor_y = position.y;
+        let monitor_width = size.width as i32;
+        let monitor_height = size.height as i32;
+
+        let mut x = pos.x;
+        let mut y = pos.y;
+
+        if x + panel_width > monitor_x + monitor_width {
+            x = x - panel_width;
+        }
+
+        if y + panel_height > monitor_y + monitor_height {
+            y = y - panel_height;
+        }
+
+        x = std::cmp::max(
+            monitor_x,
+            std::cmp::min(x, monitor_x + monitor_width - panel_width),
+        );
+        y = std::cmp::max(
+            monitor_y,
+            std::cmp::min(y, monitor_y + monitor_height - panel_height),
+        );
+
+        let adjusted_pos = PhysicalPosition::new(x, y);
+
+        let _ = window.set_position(adjusted_pos);
+        let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize::new(
+            panel_width as u32,
+            panel_height as u32,
+        )));
     }
 
-    tauri::async_runtime::spawn(async move {
-        let mut current_monitor: Option<Monitor> = None;
-        for monitor in monitors {
-            let size = monitor.size();
-            let position: &PhysicalPosition<i32> = monitor.position();
-
-            let monitor_x = position.x;
-            let monitor_y = position.y;
-            let monitor_width = size.width as i32;
-            let monitor_height = size.height as i32;
-
-            if pos.x >= monitor_x
-                && pos.x < monitor_x + monitor_width
-                && pos.y >= monitor_y
-                && pos.y < monitor_y + monitor_height
-            {
-                current_monitor = Some(monitor);
-                break;
-            }
-        }
-
-        if let Some(monitor) = current_monitor {
-            let scale = monitor.scale_factor();
-            let panel_width = (DEFAULT_PANEL_WIDTH as f64 * scale) as i32;
-            let panel_height = (DEFAULT_PANEL_HEIGHT as f64 * scale) as i32;
-            
-            let size = monitor.size();
-            let position = monitor.position();
-
-            let monitor_x = position.x;
-            let monitor_y = position.y;
-            let monitor_width = size.width as i32;
-            let monitor_height = size.height as i32;
-
-            let mut x = pos.x;
-            let mut y = pos.y;
-
-            if x + panel_width > monitor_x + monitor_width {
-                x = x - panel_width;
-            }
-
-            if y + panel_height > monitor_y + monitor_height {
-                y = y - panel_height;
-            }
-
-            x = std::cmp::max(
-                monitor_x,
-                std::cmp::min(x, monitor_x + monitor_width - panel_width),
-            );
-            y = std::cmp::max(
-                monitor_y,
-                std::cmp::min(y, monitor_y + monitor_height - panel_height),
-            );
-
-            let adjusted_pos = PhysicalPosition::new(x, y);
-
-            let _ = window.set_position(adjusted_pos);
-            let _ = window.show();
-            let _ = window.set_always_on_top(true);
-            let _ = window.set_focus();
-            return;
-        }
-
-        let _ = window.set_position(pos);
-        let _ = window.show();
-        let _ = window.set_always_on_top(true);
-        let _ = window.set_focus();
-
-    });
+    let _ = window.show();
+    let _ = window.set_always_on_top(true);
+    let _ = window.set_focus();
 }
 
 #[tauri::command]
 async fn reregister_panel_shortcut(app: tauri::AppHandle<tauri::Wry>) -> Result<(), String> {
     let _ = app.global_shortcut().unregister_all();
     let mut shortcut_string = "CmdOrControl+Shift+V".to_string();
-    let stores = app.store("store.bin");
-    let _store = match stores {
+    let _ = match app.store("store.bin") {
         Ok(store) => {
             if let Some(value) = store.get("globalShortcut") {
                 if let Some(s) = value.as_str() {
