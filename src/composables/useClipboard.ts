@@ -1,5 +1,7 @@
 import { ref, computed } from 'vue';
 import { writeText, readText } from '@tauri-apps/plugin-clipboard-manager';
+import { invoke } from '@tauri-apps/api/core';
+import { ClipKind } from '@/types/history';
 
 export function useClipboard() {
     const content = ref<string>('');
@@ -15,6 +17,15 @@ export function useClipboard() {
     };
 
     const update = async (text: string) => {
+        try {
+            await invoke('ignore_next_clipboard_capture', {
+                hash: null,
+                kind: ClipKind.Text,
+                content: text,
+            });
+        } catch (error) {
+            console.warn('无法标记应用复制来源', error);
+        }
         await writeText(text);
         content.value = text;
     };

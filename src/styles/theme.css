@@ -1,0 +1,99 @@
+:root {
+  color-scheme: light;
+  --vibe-font-sans: "Inter", "HarmonyOS Sans", "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --vibe-radius-xl: 24px;
+  --vibe-radius-lg: 18px;
+  --vibe-radius-md: 14px;
+  --vibe-radius-sm: 10px;
+  --vibe-transition: 220ms ease;
+  --vibe-accent: #5161ff;
+  --vibe-accent-strong: #1d2bf0;
+  --vibe-bg-surface: #ffffff;
+  --vibe-bg-elevated: rgba(255, 255, 255, 0.8);
+  --vibe-bg-app: linear-gradient(145deg, #f6f8ff 0%, #f5fcff 40%, #f2f5ff 100%);
+  --vibe-border-soft: rgba(76, 94, 255, 0.08);
+  --vibe-border-strong: rgba(66, 85, 255, 0.18);
+  --vibe-text-primary: #17233d;
+  --vibe-text-secondary: rgba(23, 35, 61, 0.68);
+  --vibe-text-muted: rgba(23, 35, 61, 0.38);
+  --vibe-sidebar-bg: linear-gradient(160deg, rgba(69, 93, 255, 0.92) 0%, rgba(28, 222, 210, 0.88) 100%);
+  --vibe-sidebar-text: rgba(255, 255, 255, 0.94);
+  --vibe-sidebar-muted: rgba(255, 255, 255, 0.6);
+  --vibe-shadow-soft: 0 14px 40px rgba(49, 70, 255, 0.12);
+}
+
+.dark {
+  color-scheme: dark;
+  --vibe-accent: #7ad1f5;
+  --vibe-accent-strong: #5ab7e4;
+  --vibe-bg-surface: rgba(21, 24, 38, 0.92);
+  --vibe-bg-elevated: rgba(28, 31, 48, 0.88);
+  --vibe-bg-app: linear-gradient(145deg, #141726 0%, #162437 40%, #121626 100%);
+  --vibe-border-soft: rgba(122, 209, 245, 0.12);
+  --vibe-border-strong: rgba(122, 209, 245, 0.22);
+  --vibe-text-primary: rgba(244, 249, 255, 0.96);
+  --vibe-text-secondary: rgba(244, 249, 255, 0.75);
+  --vibe-text-muted: rgba(244, 249, 255, 0.45);
+  --vibe-sidebar-bg: linear-gradient(160deg, rgba(42, 56, 172, 0.94) 0%, rgba(16, 180, 198, 0.9) 100%);
+  --vibe-sidebar-text: rgba(244, 249, 255, 0.96);
+  --vibe-sidebar-muted: rgba(244, 249, 255, 0.68);
+  --vibe-shadow-soft: 0 16px 48px rgba(13, 23, 45, 0.6);
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--vibe-font-sans);
+  background: var(--vibe-bg-app);
+  color: var(--vibe-text-primary);
+  transition: background 320ms ease, color var(--vibe-transition);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(60% 60% at 20% 20%, rgba(81, 97, 255, 0.18), transparent 60%),
+    radial-gradient(50% 50% at 80% 10%, rgba(47, 210, 209, 0.14), transparent 65%),
+    radial-gradient(40% 40% at 60% 80%, rgba(90, 71, 255, 0.1), transparent 70%);
+  opacity: 0.65;
+  z-index: -1;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+}
+
+.app-shell {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  backdrop-filter: blur(24px) saturate(140%);
+  overflow: hidden;
+}
+
+.app-content {
+  position: absolute;
+  inset: 40px 0 0 0;
+  display: flex;
+  height: calc(100% - 40px);
+}
+
+.n-config-provider {
+  height: 100%;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--vibe-transition);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

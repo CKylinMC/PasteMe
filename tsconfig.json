@@ -24,7 +24,12 @@
       "@/*": ["./src/*"]
     },
 
-    "types": ["unplugin-icons/types/vue3"]
+    "types": [
+      "unplugin-icons/types/vue3",
+      "pinia",
+      "@tauri-apps/api",
+      "@tauri-apps/plugin-clipboard-manager"
+    ]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "components.d.ts", "unplugin-icons.d.ts"],
   "references": [{ "path": "./tsconfig.node.json" }],

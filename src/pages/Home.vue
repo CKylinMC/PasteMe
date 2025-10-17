@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { webviewWindow } from '@tauri-apps/api';
-import { window as appWindow } from '@tauri-apps/api';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { exit } from '@tauri-apps/plugin-process';
 import {
@@ -38,9 +37,7 @@ import Toast from '@/components/Toast.vue';
 
 const { config, loadConfig, saveConfig } = useConfig();
 const { autoStart, toggleAutoStart, refreshAutoStart } = useAutoStart();
-const mainview = new webviewWindow.WebviewWindow('main', {
-    url: '/',
-});
+const mainview = getCurrentWebviewWindow();
 
 const closeConfirm = ref(false);
 const toast = ref();
@@ -70,7 +67,7 @@ watch(
 const cleanupFns: Array<() => Promise<void> | void> = [];
 
 onMounted(async () => {
-    const mainWindow = appWindow.getCurrentWindow();
+    const mainWindow = getCurrentWebviewWindow();
     cleanupFns.push(
         await mainWindow.listen('tauri://resize', async () => {
             if (await mainWindow.isMinimized()) {

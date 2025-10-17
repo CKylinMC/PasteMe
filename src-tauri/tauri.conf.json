@@ -1,32 +1,32 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "PasteMe",
-  "version": "1.2.4",
-  "identifier": "in.ckyl.pasteme",
+  "productName": "VibeClip Pro",
+  "version": "1.3.7",
+  "identifier": "app.vibeclip.pro",
   "build": {
-    "beforeDevCommand": "yarn dev",
+    "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "yarn build",
+    "beforeBuildCommand": "pnpm build",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [
       {
         "label": "main",
-        "title": "PasteMe",
-        "width": 800,
-        "height": 600,
+        "title": "VibeClip Pro",
+        "width": 1100,
+        "height": 720,
         "decorations": false,
-        "resizable": false,
+        "resizable": true,
         "transparent": true,
         "visible": false,
         "url": "/"
       },
       {
         "label": "context",
-        "title": "PasteMe Context",
-        "width": 400,
-        "height": 476,
+        "title": "VibeClip Pro Panel",
+        "width": 420,
+        "height": 520,
         "url": "/panel",
         "visible": false,
         "decorations": false,
@@ -43,13 +43,16 @@
   },
   "bundle": {
     "active": true,
-    "publisher": "CKylinMC",
-    "category": "DeveloperTool",
-    "shortDescription": "Paste Me",
-    "longDescription": "PasteMe",
+    "publisher": "VibeClip Team",
+    "category": "Productivity",
+    "shortDescription": "VibeClip Pro clipboard companion",
+    "longDescription": "VibeClip Pro brings brand-new clipboard workflows, AI quick actions, and sync-ready history management.",
     "copyright": "MIT License",
-    "createUpdaterArtifacts": true,
-    "targets": "all",
+    "createUpdaterArtifacts": false,
+    "targets": [
+      "deb",
+      "rpm"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -62,9 +65,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdFRDIxOUY1RDJGMDVEQgpSV1RiQlM5ZG55SHRCeHRwd0tjMlRudjQ1UWpYaG9nL1NJQTBUM3hYS1J2M3h0dG55dTY1ckE4Ugo=",
       "endpoints": [
-        "https://github.com/CKylinMC/PasteMe/releases/latest/download/latest.json",
-        "https://gh-proxy.com/github.com/CKylinMC/PasteMe/releases/latest/download/latest.json",
-        "https://ghfast.top/https://github.com/CKylinMC/PasteMe/releases/latest/download/latest.json"
+        "https://example.com/VibeClipPro/releases/latest/download/latest.json"
       ]
     }
   }
