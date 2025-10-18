@@ -1,0 +1,1707 @@
+diff --git a/src-tauri/Cargo.lock b/src-tauri/Cargo.lock
+index 00f43c11ac153621b32ef88bbc63ba602998ca88..73a06e66a69d4c769bd0abbe31102014dc279ead 100644
+--- a/src-tauri/Cargo.lock
++++ b/src-tauri/Cargo.lock
+@@ -17,6 +17,18 @@ version = "2.0.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "512761e0bb2578dd7380c6baaa0f4ce03e84f95e960231d1dec8bf4d7d6e2627"
+ 
++[[package]]
++name = "ahash"
++version = "0.8.12"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "5a15f179cd60c4584b8a8c596927aadc462e27f2ca70c04e0071964a73ba7a75"
++dependencies = [
++ "cfg-if",
++ "once_cell",
++ "version_check",
++ "zerocopy 0.8.27",
++]
++
+ [[package]]
+ name = "aho-corasick"
+ version = "1.1.3"
+@@ -556,8 +568,10 @@ checksum = "7e36cc9d416881d2e24f9a963be5fb1cd90966419ac844274161d10488b3e825"
+ dependencies = [
+  "android-tzdata",
+  "iana-time-zone",
++ "js-sys",
+  "num-traits",
+  "serde",
++ "wasm-bindgen",
+  "windows-targets 0.52.6",
+ ]
+ 
+@@ -1117,6 +1131,18 @@ dependencies = [
+  "pin-project-lite",
+ ]
+ 
++[[package]]
++name = "fallible-iterator"
++version = "0.3.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "2acce4a10f12dc2fb14a218589d4f1f62ef011b2d0cc4b3cb1bba8e94da14649"
++
++[[package]]
++name = "fallible-streaming-iterator"
++version = "0.1.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a"
++
+ [[package]]
+ name = "fastrand"
+ version = "2.3.0"
+@@ -1661,12 +1687,30 @@ version = "0.12.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
+ 
++[[package]]
++name = "hashbrown"
++version = "0.14.5"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
++dependencies = [
++ "ahash",
++]
++
+ [[package]]
+ name = "hashbrown"
+ version = "0.15.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
+ 
++[[package]]
++name = "hashlink"
++version = "0.9.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6ba4ff7128dee98c7dc9794b6a411377e1404dba1c97deb8d1a55297bd25d8af"
++dependencies = [
++ "hashbrown 0.14.5",
++]
++
+ [[package]]
+ name = "heck"
+ version = "0.4.1"
+@@ -2235,6 +2279,17 @@ dependencies = [
+  "redox_syscall",
+ ]
+ 
++[[package]]
++name = "libsqlite3-sys"
++version = "0.28.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "0c10584274047cb335c23d3e61bcef8e323adae7c5c8c760540f73610177fc3f"
++dependencies = [
++ "cc",
++ "pkg-config",
++ "vcpkg",
++]
++
+ [[package]]
+ name = "linux-raw-sys"
+ version = "0.4.15"
+@@ -2289,6 +2344,15 @@ dependencies = [
+  "tendril",
+ ]
+ 
++[[package]]
++name = "matchers"
++version = "0.2.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d1525a2a28c7f4fa0fc98bb91ae755d1e2d1505079e05539e35bc876b5d65ae9"
++dependencies = [
++ "regex-automata",
++]
++
+ [[package]]
+ name = "matches"
+ version = "0.1.10"
+@@ -2428,6 +2492,15 @@ version = "0.1.14"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "72ef4a56884ca558e5ddb05a1d1e7e1bfd9a68d9ed024c21704cc98872dae1bb"
+ 
++[[package]]
++name = "nu-ansi-term"
++version = "0.50.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
++dependencies = [
++ "windows-sys 0.59.0",
++]
++
+ [[package]]
+ name = "num-conv"
+ version = "0.1.0"
+@@ -2839,27 +2912,6 @@ dependencies = [
+  "windows-targets 0.52.6",
+ ]
+ 
+-[[package]]
+-name = "pasteme"
+-version = "1.2.4"
+-dependencies = [
+- "enigo",
+- "serde",
+- "serde_json",
+- "tauri",
+- "tauri-build",
+- "tauri-plugin-autostart",
+- "tauri-plugin-clipboard-manager",
+- "tauri-plugin-cors-fetch",
+- "tauri-plugin-global-shortcut",
+- "tauri-plugin-http",
+- "tauri-plugin-opener",
+- "tauri-plugin-process",
+- "tauri-plugin-single-instance",
+- "tauri-plugin-store",
+- "tauri-plugin-updater",
+-]
+-
+ [[package]]
+ name = "pathdiff"
+ version = "0.2.3"
+@@ -3088,7 +3140,7 @@ version = "0.2.20"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "77957b295656769bb8ad2b6a6b09d897d94f05c41b069aede1fcdaa675eaea04"
+ dependencies = [
+- "zerocopy",
++ "zerocopy 0.7.35",
+ ]
+ 
+ [[package]]
+@@ -3461,6 +3513,21 @@ dependencies = [
+  "windows-sys 0.52.0",
+ ]
+ 
++[[package]]
++name = "rusqlite"
++version = "0.31.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b838eba278d213a8beaf485bd313fd580ca4505a00d5871caeb1457c55322cae"
++dependencies = [
++ "bitflags 2.8.0",
++ "chrono",
++ "fallible-iterator",
++ "fallible-streaming-iterator",
++ "hashlink",
++ "libsqlite3-sys",
++ "smallvec",
++]
++
+ [[package]]
+ name = "rustc-demangle"
+ version = "0.1.24"
+@@ -3780,6 +3847,15 @@ dependencies = [
+  "digest",
+ ]
+ 
++[[package]]
++name = "sharded-slab"
++version = "0.1.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6"
++dependencies = [
++ "lazy_static",
++]
++
+ [[package]]
+ name = "shlex"
+ version = "1.3.0"
+@@ -4584,6 +4660,15 @@ dependencies = [
+  "syn 2.0.98",
+ ]
+ 
++[[package]]
++name = "thread_local"
++version = "1.1.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f60246a4944f24f6e018aa17cdeffb7818b76356965d03b07d6a9886e8962185"
++dependencies = [
++ "cfg-if",
++]
++
+ [[package]]
+ name = "tiff"
+ version = "0.9.1"
+@@ -4813,6 +4898,36 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "e672c95779cf947c5311f83787af4fa8fffd12fb27e4993211a84bdfd9610f9c"
+ dependencies = [
+  "once_cell",
++ "valuable",
++]
++
++[[package]]
++name = "tracing-log"
++version = "0.2.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
++dependencies = [
++ "log",
++ "once_cell",
++ "tracing-core",
++]
++
++[[package]]
++name = "tracing-subscriber"
++version = "0.3.20"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "2054a14f5307d601f88daf0553e1cbf472acc4f2c51afab632431cdcd72124d5"
++dependencies = [
++ "matchers",
++ "nu-ansi-term",
++ "once_cell",
++ "regex-automata",
++ "sharded-slab",
++ "smallvec",
++ "thread_local",
++ "tracing",
++ "tracing-core",
++ "tracing-log",
+ ]
+ 
+ [[package]]
+@@ -4977,6 +5092,18 @@ dependencies = [
+  "serde",
+ ]
+ 
++[[package]]
++name = "valuable"
++version = "0.1.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
++
++[[package]]
++name = "vcpkg"
++version = "0.2.15"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
++
+ [[package]]
+ name = "version-compare"
+ version = "0.2.0"
+@@ -4989,6 +5116,37 @@ version = "0.9.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
+ 
++[[package]]
++name = "vibeclip_pro"
++version = "1.0.0"
++dependencies = [
++ "anyhow",
++ "base64 0.22.1",
++ "chrono",
++ "enigo",
++ "log",
++ "reqwest",
++ "rusqlite",
++ "serde",
++ "serde_json",
++ "serde_repr",
++ "tauri",
++ "tauri-build",
++ "tauri-plugin-autostart",
++ "tauri-plugin-clipboard-manager",
++ "tauri-plugin-cors-fetch",
++ "tauri-plugin-global-shortcut",
++ "tauri-plugin-http",
++ "tauri-plugin-opener",
++ "tauri-plugin-process",
++ "tauri-plugin-single-instance",
++ "tauri-plugin-store",
++ "tauri-plugin-updater",
++ "thiserror 1.0.69",
++ "tracing",
++ "tracing-subscriber",
++]
++
+ [[package]]
+ name = "vswhom"
+ version = "0.1.0"
+@@ -6038,7 +6196,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "1b9b4fd18abc82b8136838da5d50bae7bdea537c574d8dc1a34ed098d6c166f0"
+ dependencies = [
+  "byteorder",
+- "zerocopy-derive",
++ "zerocopy-derive 0.7.35",
++]
++
++[[package]]
++name = "zerocopy"
++version = "0.8.27"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "0894878a5fa3edfd6da3f88c4805f4c8558e2b996227a3d864f47fe11e38282c"
++dependencies = [
++ "zerocopy-derive 0.8.27",
+ ]
+ 
+ [[package]]
+@@ -6052,6 +6219,17 @@ dependencies = [
+  "syn 2.0.98",
+ ]
+ 
++[[package]]
++name = "zerocopy-derive"
++version = "0.8.27"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "88d2b8d9c68ad2b9e4340d7832716a4d21a22a1154777ad56ea55c51a9cf3831"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "syn 2.0.98",
++]
++
+ [[package]]
+ name = "zerofrom"
+ version = "0.1.5"
+diff --git a/src-tauri/Cargo.toml b/src-tauri/Cargo.toml
+index cdbff0b736eed9714062b619e767ac99d9e15187..35e263845c01362766c84af37268b81fde8ba9ad 100644
+--- a/src-tauri/Cargo.toml
++++ b/src-tauri/Cargo.toml
+@@ -1,17 +1,12 @@
+ [package]
+-name = "pasteme"
+-version = "1.2.4"
+-description = "A simple clipboard manager"
+-authors = ["CKylinMC"]
++name = "vibeclip_pro"
++version = "1.0.0"
++description = "VibeClip Pro desktop clipboard companion"
++authors = ["VibeClip Contributors"]
+ edition = "2021"
+ 
+-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+-
+ [lib]
+-# The `_lib` suffix may seem redundant but it is necessary
+-# to make the lib name unique and wouldn't conflict with the bin name.
+-# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+-name = "pasteme_lib"
++name = "vibeclip_pro_lib"
+ crate-type = ["staticlib", "cdylib", "rlib"]
+ 
+ [build-dependencies]
+@@ -20,17 +15,28 @@ tauri-build = { version = "2", features = [] }
+ [dependencies]
+ tauri = { version = "2.3.1", features = ["tray-icon"] }
+ tauri-plugin-opener = "2.2.6"
+-serde = { version = "1.0.218", features = ["derive"] }
+-serde_json = "1.0.140"
+ tauri-plugin-clipboard-manager = "2"
+ tauri-plugin-store = "2"
+ tauri-plugin-process = "2"
+-enigo = "0.3.0"
+ tauri-plugin-http = { version = "2", features = ["unsafe-headers"] }
++tauri-plugin-cors-fetch = "3.1.0"
++serde = { version = "1.0", features = ["derive"] }
++serde_json = "1.0"
++thiserror = "1.0"
++rusqlite = { version = "0.31", features = ["bundled", "chrono"] }
++chrono = { version = "0.4", features = ["serde", "clock"] }
++reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
++base64 = "0.22"
++serde_repr = "0.1"
++log = "0.4"
++tracing = "0.1"
++tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
++anyhow = "1.0"
+ 
+ [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+ tauri-plugin-autostart = "2"
+ tauri-plugin-global-shortcut = "2"
+ tauri-plugin-single-instance = "2.2.2"
+ tauri-plugin-updater = "2.5.1"
+-tauri-plugin-cors-fetch = "3.1.0"
++
++enigo = "0.3.0"
+diff --git a/src-tauri/src/ai_client.rs b/src-tauri/src/ai_client.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..0b4a3cd949a5f82f9bafa62b46e8db2e74f9d019
+--- /dev/null
++++ b/src-tauri/src/ai_client.rs
+@@ -0,0 +1,143 @@
++use anyhow::{Context, Result};
++use chrono::{DateTime, Utc};
++use serde::{Deserialize, Serialize};
++
++#[derive(Debug, Clone, Deserialize)]
++pub struct AiActionRequest {
++    pub action: AiActionKind,
++    pub input: String,
++    pub language: Option<String>,
++    pub custom_prompt: Option<String>,
++    pub api_key: String,
++    pub base_url: String,
++    pub model: Option<String>,
++    #[serde(default)]
++    pub temperature: Option<f32>,
++}
++
++#[derive(Debug, Clone, Serialize)]
++pub struct AiActionResponse {
++    pub result: String,
++    pub used_prompt: String,
++    pub finished_at: DateTime<Utc>,
++}
++
++#[derive(Debug, Clone, Deserialize, Serialize)]
++#[serde(rename_all = "camelCase")]
++pub enum AiActionKind {
++    Translate,
++    Summarize,
++    Polish,
++    Jsonify,
++    Custom,
++}
++
++pub async fn perform(request: AiActionRequest) -> Result<AiActionResponse> {
++    let api_key = request.api_key.trim().to_string();
++    if api_key.is_empty() {
++        anyhow::bail!("OpenAI compatible API key is not configured");
++    }
++    let base_url = request.base_url.trim().trim_end_matches('/');
++    if base_url.is_empty() {
++        anyhow::bail!("OpenAI compatible Base URL is missing");
++    }
++
++    let model = request
++        .model
++        .clone()
++        .unwrap_or_else(|| "gpt-4o-mini".to_string());
++    let (system_prompt, user_prompt) = build_prompts(&request);
++    let payload = serde_json::json!({
++        "model": model,
++        "messages": [
++            {"role": "system", "content": system_prompt},
++            {"role": "user", "content": user_prompt}
++        ],
++        "temperature": request.temperature.unwrap_or(0.3_f32)
++    });
++
++    let client = reqwest::Client::new();
++    let url = format!("{}/v1/chat/completions", base_url);
++    let response = client
++        .post(url)
++        .bearer_auth(api_key)
++        .json(&payload)
++        .send()
++        .await
++        .context("failed to call OpenAI compatible endpoint")?;
++    if !response.status().is_success() {
++        let status = response.status();
++        let text = response.text().await.unwrap_or_default();
++        anyhow::bail!("AI provider responded with {}: {}", status, text);
++    }
++    let body: serde_json::Value = response
++        .json()
++        .await
++        .context("failed to decode AI response")?;
++    let choices = body
++        .get("choices")
++        .and_then(|v| v.as_array())
++        .context("AI response does not include choices")?;
++    let message = choices
++        .first()
++        .and_then(|choice| choice.get("message"))
++        .and_then(|msg| msg.get("content"))
++        .and_then(|content| content.as_str())
++        .context("AI response does not include assistant message")?;
++
++    Ok(AiActionResponse {
++        result: message.trim().to_string(),
++        used_prompt: user_prompt,
++        finished_at: Utc::now(),
++    })
++}
++
++fn build_prompts(request: &AiActionRequest) -> (String, String) {
++    let language = request
++        .language
++        .as_ref()
++        .map(|s| s.trim())
++        .filter(|s| !s.is_empty())
++        .unwrap_or("zh-CN");
++
++    match request.action {
++        AiActionKind::Translate => (
++            format!(
++                "You are VibeClip Pro, a precise multilingual translator.
++Respond in {} with a natural translation.",
++                language
++            ),
++            format!("{}", request.input.trim()),
++        ),
++        AiActionKind::Summarize => (
++            format!(
++                "You are VibeClip Pro, an expert summarizer.
++Summaries must be concise bullet points in {}.",
++                language
++            ),
++            format!("Summarize the following content:\n{}", request.input.trim()),
++        ),
++        AiActionKind::Polish => (
++            format!(
++                "You are VibeClip Pro, a writing assistant who enhances clarity.
++Keep the meaning but improve fluency in {}.",
++                language
++            ),
++            format!("Improve the following content:\n{}", request.input.trim()),
++        ),
++        AiActionKind::Jsonify => (
++            "You are VibeClip Pro, a data formatter returning strict JSON.".to_string(),
++            format!(
++                "Convert the following content into valid JSON. Use lowercase keys.\n{}",
++                request.input.trim()
++            ),
++        ),
++        AiActionKind::Custom => (
++            request
++                .custom_prompt
++                .clone()
++                .unwrap_or_else(|| "You are VibeClip Pro, a helpful assistant.".to_string()),
++            request.input.trim().to_string(),
++        ),
++    }
++}
+diff --git a/src-tauri/src/clipboard.rs b/src-tauri/src/clipboard.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..96a193ac08ed7355c57dd38b7435c3263e99a7c6
+--- /dev/null
++++ b/src-tauri/src/clipboard.rs
+@@ -0,0 +1,80 @@
++use anyhow::{Context, Result};
++use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
++use base64::Engine;
++use serde::{Deserialize, Serialize};
++
++use crate::db::{ClipKind, ClipPayload};
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++#[serde(rename_all = "camelCase")]
++pub struct ClipboardDraft {
++    pub kind: ClipKind,
++    #[serde(default)]
++    pub text: Option<String>,
++    #[serde(default)]
++    pub image_base64: Option<String>,
++    #[serde(default)]
++    pub file_path: Option<String>,
++    #[serde(default)]
++    pub preview: Option<String>,
++    #[serde(default)]
++    pub extra: Option<String>,
++    #[serde(default)]
++    pub is_pinned: bool,
++    #[serde(default)]
++    pub is_favorite: bool,
++}
++
++impl ClipboardDraft {
++    pub fn into_payload(self) -> Result<ClipPayload> {
++        match self.kind {
++            ClipKind::Text => {
++                let content = self
++                    .text
++                    .context("Text clipboard payload is missing text field")?;
++                Ok(ClipPayload {
++                    kind: ClipKind::Text,
++                    content,
++                    preview: self.preview.or_else(|| Some("文本".to_string())),
++                    extra: self.extra,
++                    is_pinned: self.is_pinned,
++                    is_favorite: self.is_favorite,
++                })
++            }
++            ClipKind::Image => {
++                let image_base64 = self
++                    .image_base64
++                    .context("Image payload requires base64 data")?;
++                validate_base64(&image_base64)?;
++                Ok(ClipPayload {
++                    kind: ClipKind::Image,
++                    content: image_base64.clone(),
++                    preview: self.preview.or(Some("Image".into())),
++                    extra: self.extra,
++                    is_pinned: self.is_pinned,
++                    is_favorite: self.is_favorite,
++                })
++            }
++            ClipKind::File => {
++                let path = self
++                    .file_path
++                    .context("File clipboard payload is missing file_path")?;
++                Ok(ClipPayload {
++                    kind: ClipKind::File,
++                    content: path.clone(),
++                    preview: self.preview.or_else(|| Some(path)),
++                    extra: self.extra,
++                    is_pinned: self.is_pinned,
++                    is_favorite: self.is_favorite,
++                })
++            }
++        }
++    }
++}
++
++fn validate_base64(data: &str) -> Result<()> {
++    BASE64_STANDARD
++        .decode(data.trim())
++        .context("Invalid base64 data provided for image clipboard entry")?;
++    Ok(())
++}
+diff --git a/src-tauri/src/db.rs b/src-tauri/src/db.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..f69bd474abe202be66075a23d58e05feb0dab8e1
+--- /dev/null
++++ b/src-tauri/src/db.rs
+@@ -0,0 +1,312 @@
++use std::path::PathBuf;
++
++use anyhow::Context;
++use chrono::{DateTime, Utc};
++use rusqlite::{params, Connection, OptionalExtension};
++use serde::{Deserialize, Serialize};
++use serde_repr::{Deserialize_repr, Serialize_repr};
++use tauri::AppHandle;
++
++#[derive(Debug, Clone)]
++pub struct DbState {
++    path: PathBuf,
++}
++
++impl DbState {
++    pub fn initialize(app: &AppHandle) -> anyhow::Result<Self> {
++        let mut path = app
++            .path()
++            .app_data_dir()
++            .context("failed to resolve application data directory")?;
++        std::fs::create_dir_all(&path).context("failed to create application data directory")?;
++        path.push("vibeclip_pro.db");
++        let state = Self { path };
++        state.migrate()?;
++        Ok(state)
++    }
++
++    pub fn clone_for_thread(&self) -> Self {
++        Self {
++            path: self.path.clone(),
++        }
++    }
++
++    fn connect(&self) -> anyhow::Result<Connection> {
++        Connection::open(&self.path).context("failed to open sqlite connection")
++    }
++
++    fn migrate(&self) -> anyhow::Result<()> {
++        let conn = self.connect()?;
++        conn.execute_batch(
++            r#"
++            PRAGMA journal_mode = WAL;
++            PRAGMA foreign_keys = ON;
++            CREATE TABLE IF NOT EXISTS clips (
++                id INTEGER PRIMARY KEY AUTOINCREMENT,
++                kind INTEGER NOT NULL,
++                content TEXT NOT NULL,
++                preview TEXT,
++                extra TEXT,
++                is_pinned INTEGER NOT NULL DEFAULT 0,
++                is_favorite INTEGER NOT NULL DEFAULT 0,
++                created_at INTEGER NOT NULL,
++                updated_at INTEGER NOT NULL
++            );
++            CREATE INDEX IF NOT EXISTS idx_clips_created_at ON clips(created_at DESC);
++            CREATE INDEX IF NOT EXISTS idx_clips_favorite ON clips(is_favorite DESC, is_pinned DESC);
++            "#,
++        )
++        .context("failed to run migrations")?;
++        Ok(())
++    }
++
++    pub fn list(
++        &self,
++        query: Option<String>,
++        limit: Option<u32>,
++        include_favorites_first: bool,
++    ) -> anyhow::Result<Vec<ClipItem>> {
++        let conn = self.connect()?;
++        let mut sql = String::from(
++            "SELECT id, kind, content, preview, extra, is_pinned, is_favorite, created_at, updated_at FROM clips",
++        );
++        let mut params_vec: Vec<(String, String)> = Vec::new();
++        if let Some(q) = query.as_ref().filter(|q| !q.trim().is_empty()) {
++            sql.push_str(" WHERE content LIKE :q OR COALESCE(preview, '') LIKE :q");
++            params_vec.push((":q".into(), format!("%{}%", q.trim())));
++        }
++        if include_favorites_first {
++            sql.push_str(" ORDER BY is_favorite DESC, is_pinned DESC, updated_at DESC");
++        } else {
++            sql.push_str(" ORDER BY is_pinned DESC, updated_at DESC");
++        }
++        if let Some(l) = limit {
++            sql.push_str(&format!(" LIMIT {}", l));
++        }
++        let mut statement = conn.prepare(&sql)?;
++        let named_params: Vec<(&str, &str)> = params_vec
++            .iter()
++            .map(|(k, v)| (k.as_str(), v.as_str()))
++            .collect();
++        let items = statement
++            .query_map_named(named_params.as_slice(), |row| {
++                Ok(ClipItem {
++                    id: row.get(0)?,
++                    kind: row.get(1)?,
++                    content: row.get(2)?,
++                    preview: row.get(3)?,
++                    extra: row.get(4)?,
++                    is_pinned: row.get::<_, i64>(5)? == 1,
++                    is_favorite: row.get::<_, i64>(6)? == 1,
++                    created_at: timestamp_to_datetime(row.get(7)?),
++                    updated_at: timestamp_to_datetime(row.get(8)?),
++                })
++            })?
++            .collect::<Result<Vec<_>, _>>()?;
++        Ok(items)
++    }
++
++    pub fn get(&self, id: i64) -> anyhow::Result<Option<ClipItem>> {
++        let conn = self.connect()?;
++        conn.query_row(
++            "SELECT id, kind, content, preview, extra, is_pinned, is_favorite, created_at, updated_at FROM clips WHERE id = ?1",
++            params![id],
++            |row| {
++                Ok(ClipItem {
++                    id: row.get(0)?,
++                    kind: row.get(1)?,
++                    content: row.get(2)?,
++                    preview: row.get(3)?,
++                    extra: row.get(4)?,
++                    is_pinned: row.get::<_, i64>(5)? == 1,
++                    is_favorite: row.get::<_, i64>(6)? == 1,
++                    created_at: timestamp_to_datetime(row.get(7)?),
++                    updated_at: timestamp_to_datetime(row.get(8)?),
++                })
++            },
++        )
++        .optional()
++    }
++
++    pub fn insert(&self, payload: ClipPayload) -> anyhow::Result<ClipItem> {
++        let conn = self.connect()?;
++        let now = Utc::now();
++        conn.execute(
++            "INSERT INTO clips (kind, content, preview, extra, is_pinned, is_favorite, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
++            params![
++                payload.kind as i64,
++                payload.content,
++                payload.preview,
++                payload.extra,
++                payload.is_pinned as i64,
++                payload.is_favorite as i64,
++                datetime_to_timestamp(now),
++                datetime_to_timestamp(now)
++            ],
++        )?;
++        let id = conn.last_insert_rowid();
++        self.get(id)?.context("failed to load inserted clip")
++    }
++
++    pub fn update_flags(
++        &self,
++        id: i64,
++        pinned: Option<bool>,
++        favorite: Option<bool>,
++    ) -> anyhow::Result<()> {
++        if pinned.is_none() && favorite.is_none() {
++            return Ok(());
++        }
++
++        let conn = self.connect()?;
++        let mut sql = String::from("UPDATE clips SET ");
++        let mut sets = Vec::new();
++        if let Some(_) = pinned {
++            sets.push("is_pinned = :pinned".to_string());
++        }
++        if let Some(_) = favorite {
++            sets.push("is_favorite = :favorite".to_string());
++        }
++        sets.push("updated_at = :updated_at".to_string());
++        sql.push_str(&sets.join(", "));
++        sql.push_str(" WHERE id = :id");
++
++        use rusqlite::types::Value;
++        let mut statement = conn.prepare(&sql)?;
++        let now = datetime_to_timestamp(Utc::now());
++        let mut bindings: Vec<(&str, Value)> = vec![
++            (":updated_at", Value::Integer(now)),
++            (":id", Value::Integer(id)),
++        ];
++        if let Some(value) = pinned {
++            bindings.push((":pinned", Value::Integer(if value { 1 } else { 0 })));
++        }
++        if let Some(value) = favorite {
++            bindings.push((":favorite", Value::Integer(if value { 1 } else { 0 })));
++        }
++        statement.execute_named(bindings.as_slice())?;
++        Ok(())
++    }
++
++    pub fn update_content(
++        &self,
++        id: i64,
++        content: String,
++        preview: Option<String>,
++    ) -> anyhow::Result<()> {
++        let conn = self.connect()?;
++        conn.execute(
++            "UPDATE clips SET content = ?1, preview = ?2, updated_at = ?3 WHERE id = ?4",
++            params![content, preview, datetime_to_timestamp(Utc::now()), id],
++        )?;
++        Ok(())
++    }
++
++    pub fn delete(&self, id: i64) -> anyhow::Result<()> {
++        let conn = self.connect()?;
++        conn.execute("DELETE FROM clips WHERE id = ?1", params![id])?;
++        Ok(())
++    }
++
++    pub fn clear(&self) -> anyhow::Result<()> {
++        let conn = self.connect()?;
++        conn.execute("DELETE FROM clips", [])?;
++        Ok(())
++    }
++
++    pub fn export_all(&self) -> anyhow::Result<Vec<ClipItem>> {
++        self.list(None, None, true)
++    }
++
++    pub fn import_many(&self, items: Vec<ClipItem>) -> anyhow::Result<usize> {
++        let conn = self.connect()?;
++        let tx = conn.transaction()?;
++        let mut changes = 0usize;
++        for item in items {
++            tx.execute(
++                "INSERT INTO clips (id, kind, content, preview, extra, is_pinned, is_favorite, created_at, updated_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
++                params![
++                    item.id,
++                    item.kind as i64,
++                    item.content,
++                    item.preview,
++                    item.extra,
++                    item.is_pinned as i64,
++                    item.is_favorite as i64,
++                    datetime_to_timestamp(item.created_at),
++                    datetime_to_timestamp(item.updated_at)
++                ],
++            )?;
++            changes += 1;
++        }
++        tx.commit()?;
++        Ok(changes)
++    }
++
++    pub fn prune_older_than(&self, keep_latest: usize) -> anyhow::Result<usize> {
++        if keep_latest == 0 {
++            return Ok(0);
++        }
++        let conn = self.connect()?;
++        let mut stmt = conn
++            .prepare("SELECT updated_at FROM clips ORDER BY updated_at DESC LIMIT 1 OFFSET ?1")?;
++        let threshold: Option<i64> = stmt
++            .query_row(params![(keep_latest as i64).saturating_sub(1)], |row| {
++                row.get(0)
++            })
++            .optional()?;
++        if let Some(threshold_ts) = threshold {
++            let deleted = conn.execute(
++                "DELETE FROM clips WHERE updated_at < ?1",
++                params![threshold_ts],
++            )?;
++            Ok(deleted as usize)
++        } else {
++            Ok(0)
++        }
++    }
++}
++
++fn datetime_to_timestamp(dt: DateTime<Utc>) -> i64 {
++    dt.timestamp()
++}
++
++fn timestamp_to_datetime(ts: i64) -> DateTime<Utc> {
++    DateTime::<Utc>::from_utc(
++        chrono::NaiveDateTime::from_timestamp_opt(ts, 0).unwrap(),
++        Utc,
++    )
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++pub struct ClipItem {
++    pub id: i64,
++    pub kind: ClipKind,
++    pub content: String,
++    pub preview: Option<String>,
++    pub extra: Option<String>,
++    pub is_pinned: bool,
++    pub is_favorite: bool,
++    pub created_at: DateTime<Utc>,
++    pub updated_at: DateTime<Utc>,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++pub struct ClipPayload {
++    pub kind: ClipKind,
++    pub content: String,
++    pub preview: Option<String>,
++    pub extra: Option<String>,
++    #[serde(default)]
++    pub is_pinned: bool,
++    #[serde(default)]
++    pub is_favorite: bool,
++}
++
++#[derive(Debug, Clone, Copy, Serialize_repr, Deserialize_repr)]
++#[repr(u8)]
++pub enum ClipKind {
++    Text = 1,
++    Image = 2,
++    File = 3,
++}
+diff --git a/src-tauri/src/lib.rs b/src-tauri/src/lib.rs
+index ce2be7827ea06ff3666d0dd8cac29f52402c9d05..0f61bdf5971cc40b8059301a48c4ba7645f26125 100644
+--- a/src-tauri/src/lib.rs
++++ b/src-tauri/src/lib.rs
+@@ -1,26 +1,201 @@
++mod ai_client;
++mod clipboard;
++mod db;
++mod state;
+ mod tray;
+ 
+-use enigo::{Direction, Enigo, Key, Keyboard, Mouse, Settings};
+-use tauri::{AppHandle, Manager, Monitor, PhysicalPosition, Runtime};
++use ai_client::{AiActionRequest, AiActionResponse};
++use clipboard::ClipboardDraft;
++use db::{ClipItem, DbState};
++use state::AppStatus;
++
++use chrono::Utc;
++use enigo::{Direction, Enigo, Key, Keyboard, Settings};
++use serde::Serialize;
++use tauri::{AppHandle, Manager, Runtime, State};
+ use tauri_plugin_autostart::MacosLauncher;
+ use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
+ use tauri_plugin_store::StoreExt;
+ 
+-use serde_json::json;
++const DEFAULT_SHORTCUT: &str = "CmdOrControl+Shift+V";
++const HISTORY_LIMIT: u32 = 200;
++
++#[derive(Debug, Serialize)]
++struct HistoryExportPayload {
++    exported_at: i64,
++    items: Vec<ClipItem>,
++}
++
++#[tauri::command]
++async fn insert_clip(
++    status: State<'_, AppStatus>,
++    db: State<'_, DbState>,
++    draft: ClipboardDraft,
++) -> Result<ClipItem, String> {
++    if !status.listening() {
++        return Err("监听已暂停".into());
++    }
++    let payload = draft.into_payload().map_err(|err| err.to_string())?;
++    let db_clone = db.clone_for_thread();
++    tauri::async_runtime::spawn_blocking(move || db_clone.insert(payload))
++        .await
++        .map_err(|err| err.to_string())?
++        .map_err(|err| err.to_string())
++}
++
++#[tauri::command]
++async fn update_clip_content(
++    db: State<'_, DbState>,
++    id: i64,
++    payload: ClipboardDraft,
++) -> Result<(), String> {
++    let clip_payload = payload.into_payload().map_err(|err| err.to_string())?;
++    let db_clone = db.clone_for_thread();
++    tauri::async_runtime::spawn_blocking(move || {
++        db_clone.update_content(id, clip_payload.content, clip_payload.preview)
++    })
++    .await
++    .map_err(|err| err.to_string())?
++    .map_err(|err| err.to_string())
++}
++
++#[tauri::command]
++async fn fetch_clips(
++    db: State<'_, DbState>,
++    query: Option<String>,
++    favorites_first: Option<bool>,
++    limit: Option<u32>,
++) -> Result<Vec<ClipItem>, String> {
++    let db_clone = db.clone_for_thread();
++    let query_clone = query.clone();
++    tauri::async_runtime::spawn_blocking(move || {
++        db_clone.list(
++            query_clone,
++            limit.or(Some(HISTORY_LIMIT)),
++            favorites_first.unwrap_or(true),
++        )
++    })
++    .await
++    .map_err(|err| err.to_string())?
++    .map_err(|err| err.to_string())
++}
++
++#[tauri::command]
++async fn update_clip_flags(
++    db: State<'_, DbState>,
++    id: i64,
++    pinned: Option<bool>,
++    favorite: Option<bool>,
++) -> Result<(), String> {
++    let db_clone = db.clone_for_thread();
++    tauri::async_runtime::spawn_blocking(move || db_clone.update_flags(id, pinned, favorite))
++        .await
++        .map_err(|err| err.to_string())?
++        .map_err(|err| err.to_string())
++}
++
++#[tauri::command]
++async fn remove_clip(db: State<'_, DbState>, id: i64) -> Result<(), String> {
++    let db_clone = db.clone_for_thread();
++    tauri::async_runtime::spawn_blocking(move || db_clone.delete(id))
++        .await
++        .map_err(|err| err.to_string())?
++        .map_err(|err| err.to_string())
++}
++
++#[tauri::command]
++async fn clear_history(db: State<'_, DbState>) -> Result<(), String> {
++    let db_clone = db.clone_for_thread();
++    tauri::async_runtime::spawn_blocking(move || db_clone.clear())
++        .await
++        .map_err(|err| err.to_string())?
++        .map_err(|err| err.to_string())
++}
++
++#[tauri::command]
++async fn export_history(db: State<'_, DbState>) -> Result<HistoryExportPayload, String> {
++    let db_clone = db.clone_for_thread();
++    let items = tauri::async_runtime::spawn_blocking(move || db_clone.export_all())
++        .await
++        .map_err(|err| err.to_string())?
++        .map_err(|err| err.to_string())?;
++    Ok(HistoryExportPayload {
++        exported_at: Utc::now().timestamp(),
++        items,
++    })
++}
++
++#[tauri::command]
++async fn import_history(db: State<'_, DbState>, items: Vec<ClipItem>) -> Result<usize, String> {
++    let db_clone = db.clone_for_thread();
++    tauri::async_runtime::spawn_blocking(move || db_clone.import_many(items))
++        .await
++        .map_err(|err| err.to_string())?
++        .map_err(|err| err.to_string())
++}
++
++#[tauri::command]
++async fn prune_history(db: State<'_, DbState>, keep_latest: usize) -> Result<usize, String> {
++    let db_clone = db.clone_for_thread();
++    tauri::async_runtime::spawn_blocking(move || db_clone.prune_older_than(keep_latest))
++        .await
++        .map_err(|err| err.to_string())?
++        .map_err(|err| err.to_string())
++}
+ 
+-const DEFAULT_PANEL_WIDTH: i32 = 400;
+-const DEFAULT_PANEL_HEIGHT: i32 = 476;
++#[tauri::command]
++async fn perform_ai_action(
++    app: AppHandle,
++    status: State<'_, AppStatus>,
++    request: AiActionRequest,
++) -> Result<AiActionResponse, String> {
++    if status.offline() {
++        return Err("离线模式已开启，无法调用 AI 服务".into());
++    }
++    let store = app.store("store.bin").map_err(|e| e.to_string())?;
++    let offline_block = store.get("offlineMode");
++    if offline_block
++        .and_then(|value| value.as_bool())
++        .unwrap_or(false)
++    {
++        return Err("离线模式已开启，无法调用 AI 服务".into());
++    }
++
++    ai_client::perform(request)
++        .await
++        .map_err(|err| err.to_string())
++}
++
++#[tauri::command]
++async fn get_app_status(status: State<'_, AppStatus>) -> Result<AppStatusSnapshot, String> {
++    Ok(AppStatusSnapshot {
++        listening: status.listening(),
++        offline: status.offline(),
++    })
++}
++
++#[tauri::command]
++async fn set_listening(status: State<'_, AppStatus>, listening: bool) -> Result<(), String> {
++    status.set_listening(listening);
++    Ok(())
++}
++
++#[tauri::command]
++async fn set_offline(status: State<'_, AppStatus>, offline: bool) -> Result<(), String> {
++    status.set_offline(offline);
++    Ok(())
++}
+ 
+ #[tauri::command]
+ async fn input_text(text: &str) -> Result<(), String> {
+-    let mut enigo = Enigo::new(&Settings::default()).unwrap();
+-    enigo.text(text).unwrap();
++    let mut enigo = Enigo::new(&Settings::default()).map_err(|err| err.to_string())?;
++    enigo.text(text).map_err(|err| err.to_string())?;
+     Ok(())
+ }
+ 
+ #[tauri::command]
+ async fn simulate_paste() -> Result<(), String> {
+-    let mut enigo = Enigo::new(&Settings::default()).unwrap();
++    let mut enigo = Enigo::new(&Settings::default()).map_err(|err| err.to_string())?;
+     let _ = enigo.key(Key::Control, Direction::Press);
+     let _ = enigo.key(Key::V, Direction::Click);
+     let _ = enigo.key(Key::Control, Direction::Release);
+@@ -28,8 +203,8 @@ async fn simulate_paste() -> Result<(), String> {
+ }
+ 
+ #[tauri::command]
+-async fn get_key_from_store<R: Runtime>(
+-    app: tauri::AppHandle<R>,
++async fn get_value_from_store<R: Runtime>(
++    app: AppHandle<R>,
+     key: String,
+     fallback: serde_json::Value,
+ ) -> Result<serde_json::Value, String> {
+@@ -41,7 +216,7 @@ async fn get_key_from_store<R: Runtime>(
+     if store.has(key.clone()) {
+         let value = store
+             .get(key.clone())
+-            .expect("Failed to get value from store");
++            .map_err(|_| "读取配置失败".to_string())?;
+         Ok(value)
+     } else {
+         Ok(fallback)
+@@ -49,162 +224,47 @@ async fn get_key_from_store<R: Runtime>(
+ }
+ 
+ #[tauri::command]
+-async fn set_key_to_store<R: Runtime>(
+-    app: tauri::AppHandle<R>,
++async fn set_value_to_store<R: Runtime>(
++    app: AppHandle<R>,
+     key: String,
+     value: serde_json::Value,
+ ) -> Result<(), String> {
+     let stores = app.store("store.bin");
+     let store = match stores {
+         Ok(store) => store,
+-        Err(_) => return Err("Failed to get store".to_string()),
++        Err(_) => return Err("无法获取配置存储".to_string()),
+     };
+-    store.set(key.clone(), json!(value));
+-    store.save().expect("Failed to save store");
++    store
++        .set(key.clone(), value)
++        .map_err(|_| "写入配置失败".to_string())?;
++    store.save().map_err(|_| "保存配置失败".to_string())?;
+     Ok(())
+ }
+ 
+-fn show_window_with_name(app: &AppHandle<tauri::Wry>, name: &str) {
+-    let windows = app.webview_windows();
+-
+-    let window = windows.get(name).expect("Sorry, no window found");
+-    window.show().expect("Can't Show Window");
+-    window.set_focus().expect("Can't Bring Window to Focus");
+-}
+-
+-fn show_window_with_name_and_position(app: &AppHandle<tauri::Wry>, pos: PhysicalPosition<i32>) {
+-    let windows = app.webview_windows();
+-    let window = match windows.get("context") {
+-        Some(win) => win.clone(),
+-        None => return,
+-    };
+-
+-    let monitors = match window.available_monitors() {
+-        Ok(m) => m,
+-        Err(_) => {
+-            let _ = window.center();
+-            let _ = window.show();
+-            let _ = window.set_focus();
+-            return;
+-        }
+-    };
+-
+-    if monitors.is_empty() {
+-        let _ = window.center();
+-        let _ = window.show();
+-        let _ = window.set_focus();
+-        return;
+-    }
+-
+-    tauri::async_runtime::spawn(async move {
+-        let mut current_monitor: Option<Monitor> = None;
+-        for monitor in monitors {
+-            let size = monitor.size();
+-            let position: &PhysicalPosition<i32> = monitor.position();
+-
+-            let monitor_x = position.x;
+-            let monitor_y = position.y;
+-            let monitor_width = size.width as i32;
+-            let monitor_height = size.height as i32;
+-
+-            if pos.x >= monitor_x
+-                && pos.x < monitor_x + monitor_width
+-                && pos.y >= monitor_y
+-                && pos.y < monitor_y + monitor_height
+-            {
+-                current_monitor = Some(monitor);
+-                break;
+-            }
+-        }
+-
+-        if let Some(monitor) = current_monitor {
+-            let scale = monitor.scale_factor();
+-            let panel_width = (DEFAULT_PANEL_WIDTH as f64 * scale) as i32;
+-            let panel_height = (DEFAULT_PANEL_HEIGHT as f64 * scale) as i32;
+-            
+-            let size = monitor.size();
+-            let position = monitor.position();
+-
+-            let monitor_x = position.x;
+-            let monitor_y = position.y;
+-            let monitor_width = size.width as i32;
+-            let monitor_height = size.height as i32;
+-
+-            let mut x = pos.x;
+-            let mut y = pos.y;
+-
+-            if x + panel_width > monitor_x + monitor_width {
+-                x = x - panel_width;
+-            }
+-
+-            if y + panel_height > monitor_y + monitor_height {
+-                y = y - panel_height;
+-            }
+-
+-            x = std::cmp::max(
+-                monitor_x,
+-                std::cmp::min(x, monitor_x + monitor_width - panel_width),
+-            );
+-            y = std::cmp::max(
+-                monitor_y,
+-                std::cmp::min(y, monitor_y + monitor_height - panel_height),
+-            );
+-
+-            let adjusted_pos = PhysicalPosition::new(x, y);
+-
+-            let _ = window.set_position(adjusted_pos);
+-            let _ = window.show();
+-            let _ = window.set_always_on_top(true);
+-            let _ = window.set_focus();
+-            return;
+-        }
+-
+-        let _ = window.set_position(pos);
+-        let _ = window.show();
+-        let _ = window.set_always_on_top(true);
+-        let _ = window.set_focus();
+-
+-    });
+-}
+-
+ #[tauri::command]
+-async fn reregister_panel_shortcut(app: tauri::AppHandle<tauri::Wry>) -> Result<(), String> {
++async fn register_history_shortcut(app: AppHandle, shortcut: Option<String>) -> Result<(), String> {
++    let parsed_shortcut = shortcut.unwrap_or_else(|| DEFAULT_SHORTCUT.to_string());
++    let parsed = parsed_shortcut
++        .parse::<Shortcut>()
++        .map_err(|err| err.to_string())?;
+     let _ = app.global_shortcut().unregister_all();
+-    let mut shortcut_string = "CmdOrControl+Shift+V".to_string();
+-    let stores = app.store("store.bin");
+-    let _store = match stores {
+-        Ok(store) => {
+-            if let Some(value) = store.get("globalShortcut") {
+-                if let Some(s) = value.as_str() {
+-                    shortcut_string = s.to_string();
+-                }
++    app.global_shortcut()
++        .on_shortcut(parsed, move |app_handle, _event, _shortcut| {
++            if let Some(window) = app_handle.get_webview_window("main") {
++                let _ = window.show();
++                let _ = window.set_focus();
+             }
+-        }
+-        Err(_) => return Err("Failed to read config".to_string()),
+-    };
+-    let shortcut = match shortcut_string.parse::<Shortcut>() {
+-        Ok(s) => s,
+-        Err(_) => return Err("Failed to parse shortcut".to_string()),
+-    };
+-
+-    let _ = app
+-        .global_shortcut()
+-        .on_shortcut(shortcut, move |app_handle, _event, _shortcut| {
+-            let enigo = Enigo::new(&Settings::default());
+-            let mut location = PhysicalPosition::new(0, 0);
+-
+-            if let Ok(enigo) = enigo {
+-                if let Ok(pos) = enigo.location() {
+-                    location = PhysicalPosition::new(pos.0 as i32, pos.1 as i32);
+-                }
+-            }
+-
+-            show_window_with_name_and_position(app_handle, location);
+-        });
+-
++        })
++        .map_err(|err| err.to_string())?;
+     Ok(())
+ }
+ 
++#[derive(Debug, Serialize)]
++struct AppStatusSnapshot {
++    listening: bool,
++    offline: bool,
++}
++
+ #[cfg_attr(mobile, tauri::mobile_entry_point)]
+ pub fn run() {
+     tauri::Builder::default()
+@@ -213,7 +273,10 @@ pub fn run() {
+         .plugin(tauri_plugin_process::init())
+         .plugin(tauri_plugin_store::Builder::new().build())
+         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+-            let _ = show_window_with_name(app, "main");
++            if let Some(window) = app.get_webview_window("main") {
++                let _ = window.show();
++                let _ = window.set_focus();
++            }
+         }))
+         .plugin(tauri_plugin_autostart::init(
+             MacosLauncher::LaunchAgent,
+@@ -223,28 +286,54 @@ pub fn run() {
+         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+         .setup(|app| {
+             let handle = app.handle();
+-            let _ = tray::create_tray(handle);
++            let status = AppStatus::default();
++            if let Ok(store) = handle.store("store.bin") {
++                if let Ok(value) = store.get("offlineMode") {
++                    if value.as_bool().unwrap_or(false) {
++                        status.set_offline(true);
++                    }
++                }
++            }
++            app.manage(status);
++            let db_state = DbState::initialize(&handle)?;
++            app.manage(db_state);
++            tray::create_tray(&handle)?;
+ 
+             let args: Vec<String> = std::env::args().collect();
+             if !args.contains(&"--autostart".to_string()) && !args.contains(&"--silent".to_string())
+             {
+-                show_window_with_name(app.handle(), "main");
++                if let Some(window) = handle.get_webview_window("main") {
++                    let _ = window.show();
++                }
+             }
+-            let app_handle = app.handle().clone();
++            let app_handle = handle.clone();
+             tauri::async_runtime::spawn(async move {
+-                let _ = reregister_panel_shortcut(app_handle).await;
++                let _ = register_history_shortcut(app_handle, None).await;
+             });
+             Ok(())
+         })
+         .plugin(tauri_plugin_opener::init())
+         .plugin(tauri_plugin_cors_fetch::init())
+         .invoke_handler(tauri::generate_handler![
++            insert_clip,
++            update_clip_content,
++            fetch_clips,
++            update_clip_flags,
++            remove_clip,
++            clear_history,
++            export_history,
++            import_history,
++            prune_history,
++            perform_ai_action,
++            get_app_status,
++            set_listening,
++            set_offline,
+             input_text,
+             simulate_paste,
+-            get_key_from_store,
+-            set_key_to_store,
+-            reregister_panel_shortcut
++            get_value_from_store,
++            set_value_to_store,
++            register_history_shortcut
+         ])
+         .run(tauri::generate_context!())
+-        .expect("error while running tauri application");
++        .expect("error while running VibeClip Pro");
+ }
+diff --git a/src-tauri/src/main.rs b/src-tauri/src/main.rs
+index a1ed68d0fd6ddf619df6d7103a74dbe97b291299..977f0891bec5912f421c53e46f11a6f03f20c038 100644
+--- a/src-tauri/src/main.rs
++++ b/src-tauri/src/main.rs
+@@ -1,6 +1,5 @@
+-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+ #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+ 
+ fn main() {
+-    pasteme_lib::run()
++    vibeclip_pro_lib::run()
+ }
+diff --git a/src-tauri/src/state.rs b/src-tauri/src/state.rs
+new file mode 100644
+index 0000000000000000000000000000000000000000..77e039c9d79f7b05bb4914a11066f1622d6ff952
+--- /dev/null
++++ b/src-tauri/src/state.rs
+@@ -0,0 +1,43 @@
++use std::sync::atomic::{AtomicBool, Ordering};
++
++pub struct AppStatus {
++    listening: AtomicBool,
++    offline: AtomicBool,
++}
++
++impl Default for AppStatus {
++    fn default() -> Self {
++        Self {
++            listening: AtomicBool::new(true),
++            offline: AtomicBool::new(false),
++        }
++    }
++}
++
++impl AppStatus {
++    pub fn listening(&self) -> bool {
++        self.listening.load(Ordering::SeqCst)
++    }
++
++    pub fn offline(&self) -> bool {
++        self.offline.load(Ordering::SeqCst)
++    }
++
++    pub fn set_listening(&self, value: bool) {
++        self.listening.store(value, Ordering::SeqCst);
++    }
++
++    pub fn set_offline(&self, value: bool) {
++        self.offline.store(value, Ordering::SeqCst);
++    }
++
++    pub fn toggle_listening(&self) -> bool {
++        let previous = self.listening.fetch_xor(true, Ordering::SeqCst);
++        !previous
++    }
++
++    pub fn toggle_offline(&self) -> bool {
++        let previous = self.offline.fetch_xor(true, Ordering::SeqCst);
++        !previous
++    }
++}
+diff --git a/src-tauri/src/tray.rs b/src-tauri/src/tray.rs
+index 0a70421a5d86c288da2433362ea494bf103c3be6..cbdcb893b032b651d0a182bcac447bc75bcb2b34 100644
+--- a/src-tauri/src/tray.rs
++++ b/src-tauri/src/tray.rs
+@@ -3,29 +3,73 @@ use tauri::{
+     include_image,
+     menu::{Menu, MenuItem},
+     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+-    Manager, Runtime,
++    AppHandle, Manager, Runtime,
+ };
+ 
+-pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
+-    let quit_i = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
+-    let show_i = MenuItem::with_id(app, "show", "显示主界面", true, None::<&str>)?;
+-    let menu = Menu::with_items(app, &[&show_i, &quit_i])?;
++use crate::state::AppStatus;
+ 
+-    let _ = TrayIconBuilder::with_id("main")
+-        .icon(Image::from(include_image!("icons/clipai.ico")).to_owned())
+-        .tooltip("PasteMe!")
++pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
++    let show_item = MenuItem::with_id(app, "show", "显示 VibeClip Pro", true, None::<&str>)?;
++    let hide_item = MenuItem::with_id(app, "hide", "隐藏窗口", true, None::<&str>)?;
++    let listening_item =
++        MenuItem::with_id(app, "toggle-listener", "暂停剪贴板监听", true, None::<&str>)?;
++    let offline_item =
++        MenuItem::with_id(app, "toggle-offline", "切换离线模式", true, None::<&str>)?;
++    let quit_item = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
++
++    let menu = Menu::with_items(
++        app,
++        &[
++            &show_item,
++            &hide_item,
++            &listening_item,
++            &offline_item,
++            &quit_item,
++        ],
++    )?;
++
++    TrayIconBuilder::with_id("main")
++        .icon(Image::from(include_image!("icons/icon.png")).to_owned())
+         .menu(&menu)
++        .tooltip("VibeClip Pro")
+         .show_menu_on_left_click(false)
+         .on_menu_event(move |app, event| match event.id.as_ref() {
+-            "quit" => {
+-                app.exit(0);
+-            }
+             "show" => {
+                 if let Some(window) = app.get_webview_window("main") {
+                     let _ = window.show();
+                     let _ = window.set_focus();
+                 }
+             }
++            "hide" => {
++                if let Some(window) = app.get_webview_window("main") {
++                    let _ = window.hide();
++                }
++            }
++            "toggle-listener" => {
++                let status = app.state::<AppStatus>();
++                let is_listening = status.toggle_listening();
++                if let Some(item) = event.menu_item() {
++                    let _ = item.set_text(if is_listening {
++                        "暂停剪贴板监听"
++                    } else {
++                        "恢复剪贴板监听"
++                    });
++                }
++            }
++            "toggle-offline" => {
++                let status = app.state::<AppStatus>();
++                let offline = status.toggle_offline();
++                if let Some(item) = event.menu_item() {
++                    let _ = item.set_text(if offline {
++                        "关闭离线模式"
++                    } else {
++                        "切换离线模式"
++                    });
++                }
++            }
++            "quit" => {
++                app.exit(0);
++            }
+             _ => {}
+         })
+         .on_tray_icon_event(|tray, event| {
+@@ -35,14 +79,13 @@ pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
+                 ..
+             } = event
+             {
+-                let app = tray.app_handle();
+-                if let Some(window) = app.get_webview_window("main") {
++                if let Some(window) = tray.app_handle().get_webview_window("main") {
+                     let _ = window.show();
+                     let _ = window.set_focus();
+                 }
+             }
+         })
+-        .build(app);
++        .build(app)?;
+ 
+     Ok(())
+ }
+diff --git a/src-tauri/tauri.conf.json b/src-tauri/tauri.conf.json
+index c6c926cad992006834b93321491a472d84ae9e1c..bdd61cece0f77544997a713219e24347da3b7550 100644
+--- a/src-tauri/tauri.conf.json
++++ b/src-tauri/tauri.conf.json
+@@ -1,32 +1,32 @@
+ {
+   "$schema": "https://schema.tauri.app/config/2",
+-  "productName": "PasteMe",
+-  "version": "1.2.4",
+-  "identifier": "in.ckyl.pasteme",
++  "productName": "VibeClip Pro",
++  "version": "1.0.0",
++  "identifier": "app.vibeclip.pro",
+   "build": {
+-    "beforeDevCommand": "yarn dev",
++    "beforeDevCommand": "pnpm dev",
+     "devUrl": "http://localhost:1420",
+-    "beforeBuildCommand": "yarn build",
++    "beforeBuildCommand": "pnpm build",
+     "frontendDist": "../dist"
+   },
+   "app": {
+     "windows": [
+       {
+         "label": "main",
+-        "title": "PasteMe",
+-        "width": 800,
+-        "height": 600,
++        "title": "VibeClip Pro",
++        "width": 1100,
++        "height": 720,
+         "decorations": false,
+-        "resizable": false,
++        "resizable": true,
+         "transparent": true,
+         "visible": false,
+         "url": "/"
+       },
+       {
+         "label": "context",
+-        "title": "PasteMe Context",
+-        "width": 400,
+-        "height": 476,
++        "title": "VibeClip Pro Panel",
++        "width": 420,
++        "height": 520,
+         "url": "/panel",
+         "visible": false,
+         "decorations": false,
+@@ -43,10 +43,10 @@
+   },
+   "bundle": {
+     "active": true,
+-    "publisher": "CKylinMC",
+-    "category": "DeveloperTool",
+-    "shortDescription": "Paste Me",
+-    "longDescription": "PasteMe",
++    "publisher": "VibeClip Team",
++    "category": "Productivity",
++    "shortDescription": "VibeClip Pro clipboard companion",
++    "longDescription": "VibeClip Pro brings brand-new clipboard workflows, AI quick actions, and sync-ready history management.",
+     "copyright": "MIT License",
+     "createUpdaterArtifacts": true,
+     "targets": "all",
+@@ -62,9 +62,7 @@
+     "updater": {
+       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdFRDIxOUY1RDJGMDVEQgpSV1RiQlM5ZG55SHRCeHRwd0tjMlRudjQ1UWpYaG9nL1NJQTBUM3hYS1J2M3h0dG55dTY1ckE4Ugo=",
+       "endpoints": [
+-        "https://github.com/CKylinMC/PasteMe/releases/latest/download/latest.json",
+-        "https://gh-proxy.com/github.com/CKylinMC/PasteMe/releases/latest/download/latest.json",
+-        "https://ghfast.top/https://github.com/CKylinMC/PasteMe/releases/latest/download/latest.json"
++        "https://example.com/VibeClipPro/releases/latest/download/latest.json"
+       ]
+     }
+   }

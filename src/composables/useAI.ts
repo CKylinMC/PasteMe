@@ -80,10 +80,11 @@ export function useAIImage(config: Ref<Config>) {
             imageBase64.value = result.image.base64;
 
             return result.image.base64;
-        } catch (e) {
-            console.error(e);
-            if (NoImageGeneratedError.isInstance(e)) {
-                errors.value = (e.cause as string) ?? "No image generated";
+        } catch (error: unknown) {
+            const err = error as { cause?: string };
+            console.error(err);
+            if (NoImageGeneratedError.isInstance(err)) {
+                errors.value = err.cause ?? "No image generated";
             } else {
                 errors.value = "Failed to generate image";
             }
@@ -98,7 +99,7 @@ export function useAIImage(config: Ref<Config>) {
             parameters: z.object({
                 prompt: z.string().describe('Prompt for generating image, need to be English and to be detailed, return in base64 format that you can concat to data uri and use it in markdown syntax.'),
             }),
-            execute: async ({ prompt }) => {
+            execute: async ({ prompt }: { prompt: string }) => {
                 const result = await generateAIImage(prompt);
                 if (result) return { ok: true, imageBase64: result };
                 return { ok: false, error: errors.value };
@@ -137,7 +138,7 @@ export function useAIWebSearch(config: Ref<Config>) {
         parameters: z.object({
             query: z.string().describe('The query to search the web for'),
         }),
-        execute: async ({ query }) => {
+        execute: async ({ query }: { query: string }) => {
             const result = await search(query);
             if (result) return { ok: true, result };
             return { ok: false, error: 'Failed to search' };
@@ -189,7 +190,7 @@ export function useAIWebCrawler(config: Ref<Config>) {
         parameters: z.object({
             url: z.string().describe('The URL to crawl'),
         }),
-        execute: async ({ url }) => {
+        execute: async ({ url }: { url: string }) => {
             const result = await fetchWebPage(url);
             if (result) return { ok: true, result };
             return { ok: false, error: 'Failed to crawl' };
@@ -213,7 +214,7 @@ export function useAI(config: Ref<Config>) {
             name: 'OpenAICompatiable',
             apiKey: config.value.ai.apiKey,
             baseURL: config.value.ai.endpoint,
-            fetch: (...args) => {
+            fetch: (...args: Parameters<typeof fetch>) => {
                 return config.value.ai.corsCompatiable
                 ? window.fetchCORS(...args)
                 : window.fetchNative(...args)
@@ -289,7 +290,7 @@ export function useAIChat(config: Ref<Config>) {
             name: 'OpenAICompatiable',
             apiKey: config.value.ai.apiKey,
             baseURL: config.value.ai.endpoint,
-            fetch: (...args) => {
+            fetch: (...args: Parameters<typeof fetch>) => {
                 return config.value.ai.corsCompatiable
                 ? window.fetchCORS(...args)
                 : window.fetchNative(...args)

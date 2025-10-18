@@ -1,0 +1,3499 @@
+diff --git a/src/App.vue b/src/App.vue
+index f62b095a6bd3303ba6206ff80a60808deeae97b2..bf7676de1e2835c3766136af5c081a1314ec1034 100644
+--- a/src/App.vue
++++ b/src/App.vue
+@@ -1,156 +1,44 @@
+ <script setup lang="ts">
+-import { RouterView } from 'vue-router';
+-import { darkTheme, zhCN, dateZhCN } from 'naive-ui';
+-import { onBeforeUnmount, onMounted, ref } from 'vue';
+-import type { BuiltInGlobalTheme } from 'naive-ui/es/themes/interface';
++import { RouterView } from "vue-router";
++import { computed, onMounted } from "vue";
++import { darkTheme, dateZhCN, zhCN, lightTheme } from "naive-ui";
++import { useSettingsStore } from "./store/settings";
+ 
+-const usingTheme = ref<BuiltInGlobalTheme | null>(null);
+-
+-const isSystemDarkTheme = () =>
+-    !!window.matchMedia('(prefers-color-scheme: dark)')?.matches;
+-const isSystemDarkThemeRef = ref(false);
+-
+-const updateTheme = () => {
+-    console.log('updateTheme', isSystemDarkTheme() ? 'dark' : 'light');
+-    usingTheme.value = isSystemDarkTheme() ? darkTheme : null;
+-    isSystemDarkThemeRef.value = isSystemDarkTheme();
+-};
++const settings = useSettingsStore();
+ 
+ onMounted(() => {
+-    updateTheme();
+-    window
+-        .matchMedia('(prefers-color-scheme: dark)')
+-        .addEventListener('change', updateTheme);
++  settings.bootstrap();
+ });
+ 
+-onBeforeUnmount(() => {
+-    window
+-        .matchMedia('(prefers-color-scheme: dark)')
+-        .removeEventListener('change', updateTheme);
++const theme = computed(() => {
++  if (settings.themeMode === "system") {
++    return settings.isDarkPreferred ? darkTheme : null;
++  }
++  return settings.themeMode === "dark" ? darkTheme : null;
+ });
++
++const themeOverrides = computed(() => settings.naiveThemeOverrides);
+ </script>
+ 
+ <template>
+-    <n-config-provider
+-        :locale="zhCN"
+-        :date-locale="dateZhCN"
+-        :theme="usingTheme"
+-        :class="[
+-            'size-full bg-neutral-800',
+-            isSystemDarkThemeRef ? 'dark' : '',
+-        ]"
+-    >
+-        <RouterView />
+-    </n-config-provider>
++  <n-config-provider
++    :locale="zhCN"
++    :date-locale="dateZhCN"
++    :theme="theme"
++    :theme-overrides="themeOverrides"
++  >
++    <n-loading-bar-provider>
++      <n-dialog-provider>
++        <n-message-provider placement="bottom-right" :duration="2500">
++          <div class="app-shell" :class="settings.themeClass">
++            <RouterView v-slot="{ Component }">
++              <Transition name="fade" mode="out-in">
++                <component :is="Component" />
++              </Transition>
++            </RouterView>
++          </div>
++        </n-message-provider>
++      </n-dialog-provider>
++    </n-loading-bar-provider>
++  </n-config-provider>
+ </template>
+-<style>
+-:root {
+-    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+-    font-size: 16px;
+-    line-height: 24px;
+-    font-weight: 400;
+-
+-    color: #0f0f0f;
+-    background-color: #f6f6f6;
+-
+-    font-synthesis: none;
+-    text-rendering: optimizeLegibility;
+-    -webkit-font-smoothing: antialiased;
+-    -moz-osx-font-smoothing: grayscale;
+-    -webkit-text-size-adjust: 100%;
+-}
+-
+-.container {
+-    margin: 0;
+-    padding-top: 10vh;
+-    display: flex;
+-    flex-direction: column;
+-    justify-content: center;
+-    text-align: center;
+-}
+-
+-.logo {
+-    height: 6em;
+-    padding: 1.5em;
+-    will-change: filter;
+-    transition: 0.75s;
+-}
+-
+-.logo.tauri:hover {
+-    filter: drop-shadow(0 0 2em #24c8db);
+-}
+-
+-.row {
+-    display: flex;
+-    justify-content: center;
+-}
+-
+-a {
+-    font-weight: 500;
+-    color: #646cff;
+-    text-decoration: inherit;
+-}
+-
+-a:hover {
+-    color: #535bf2;
+-}
+-
+-h1 {
+-    text-align: center;
+-}
+-
+-input,
+-button {
+-    border-radius: 8px;
+-    border: 1px solid transparent;
+-    padding: 0.6em 1.2em;
+-    font-size: 1em;
+-    font-weight: 500;
+-    font-family: inherit;
+-    color: #0f0f0f;
+-    background-color: #ffffff;
+-    transition: border-color 0.25s;
+-    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+-}
+-
+-button {
+-    cursor: pointer;
+-}
+-
+-button:hover {
+-    border-color: #396cd8;
+-}
+-button:active {
+-    border-color: #396cd8;
+-    background-color: #e8e8e8;
+-}
+-
+-input,
+-button {
+-    outline: none;
+-}
+-
+-#greet-input {
+-    margin-right: 5px;
+-}
+-
+-@media (prefers-color-scheme: dark) {
+-    :root {
+-        color: #f6f6f6;
+-        background-color: #2f2f2f;
+-    }
+-
+-    a:hover {
+-        color: #24c8db;
+-    }
+-
+-    input,
+-    button {
+-        color: #ffffff;
+-        background-color: #0f0f0f98;
+-    }
+-    button:active {
+-        background-color: #0f0f0f69;
+-    }
+-}
+-</style>
+diff --git a/src/AppInfo.ts b/src/AppInfo.ts
+index 02e0d75707c795de716214c2e815a54e49527e00..878e9f9e5fa490874d1a6ad496412f9e4e5ad0af 100644
+--- a/src/AppInfo.ts
++++ b/src/AppInfo.ts
+@@ -1,3 +1,5 @@
+ export const AppInfo = {
+-    version: "1.2.4",
+-};
+\ No newline at end of file
++  version: "1.0.0",
++};
++
++export default AppInfo;
+diff --git a/src/components/ai/AiQuickActions.vue b/src/components/ai/AiQuickActions.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..a52b53818162c77ce779e81d4474f4cbeff3cc02
+--- /dev/null
++++ b/src/components/ai/AiQuickActions.vue
+@@ -0,0 +1,186 @@
++<script setup lang="ts">
++import { computed, reactive, ref } from "vue";
++import type { AiActionKind } from "@/types/history";
++import { useSettingsStore } from "@/store/settings";
++import MdiSparkle from "~icons/mdi/sparkles";
++import MdiLanguage from "~icons/mdi/translate";
++
++const props = defineProps<{
++  loading: boolean;
++  onRun: (payload: { action: AiActionKind; input: string; language: string; customPrompt?: string }) => Promise<void>;
++  sourceText: string;
++}>();
++
++const settings = useSettingsStore();
++
++const state = reactive({
++  action: "translate" as AiActionKind,
++  language: settings.preferredLanguage.value,
++  customPrompt: "",
++  input: "",
++});
++
++const actions = [
++  { key: "translate", label: "翻译", description: "翻译到目标语言" },
++  { key: "summarize", label: "摘要", description: "生成摘要" },
++  { key: "polish", label: "润色", description: "提升表达" },
++  { key: "jsonify", label: "JSON 化", description: "结构化输出" },
++  { key: "custom", label: "自定义", description: "使用自定义 Prompt" },
++] as const;
++
++const placeholder = computed(() => {
++  if (state.action === "translate") return "输入想要翻译的内容";
++  if (state.action === "summarize") return "输入需要总结的内容";
++  if (state.action === "polish") return "输入需要润色的段落";
++  if (state.action === "jsonify") return "输入需要结构化的内容";
++  return "输入内容";
++});
++
++async function handleSubmit() {
++  const input = state.input.trim() || props.sourceText.trim();
++  if (!input) return;
++  await props.onRun({
++    action: state.action,
++    input,
++    language: state.language || settings.preferredLanguage.value,
++    customPrompt: state.customPrompt.trim() || undefined,
++  });
++  state.input = "";
++}
++</script>
++
++<template>
++  <div class="ai-card">
++    <header class="ai-header">
++      <div class="title-group">
++        <n-icon :component="MdiSparkle" size="20" />
++        <div>
++          <h3>AI 快捷操作</h3>
++          <p>翻译、摘要、润色或快速 JSON 化</p>
++        </div>
++      </div>
++      <n-select
++        v-model:value="state.language"
++        class="language-select"
++        size="small"
++        :options="[
++          { label: '中文', value: 'zh-CN' },
++          { label: 'English', value: 'en' },
++          { label: '日本語', value: 'ja' },
++          { label: '한국어', value: 'ko' },
++          { label: 'Français', value: 'fr' },
++        ]"
++        :render-label="option => option.label"
++      />
++    </header>
++    <div class="action-tabs">
++      <n-button
++        v-for="item in actions"
++        :key="item.key"
++        size="tiny"
++        quaternary
++        class="tab-button"
++        :type="state.action === item.key ? 'primary' : 'default'"
++        @click="state.action = item.key"
++      >
++        {{ item.label }}
++      </n-button>
++    </div>
++    <n-input
++      v-model:value="state.input"
++      type="textarea"
++      :autosize="{ minRows: 3, maxRows: 6 }"
++      :placeholder="placeholder"
++      class="action-input"
++    />
++    <n-input
++      v-if="state.action === 'custom'"
++      v-model:value="state.customPrompt"
++      type="textarea"
++      :autosize="{ minRows: 2, maxRows: 4 }"
++      placeholder="输入自定义 Prompt，支持 {{clipboard}} 占位符"
++      class="action-input"
++    />
++    <div class="action-footer">
++      <div class="helper">
++        <n-icon :component="MdiLanguage" size="16" />
++        <span>默认使用上方语言；留空时使用系统首选</span>
++      </div>
++      <n-button type="primary" size="small" :loading="loading" @click="handleSubmit">
++        执行
++      </n-button>
++    </div>
++  </div>
++</template>
++
++<style scoped>
++.ai-card {
++  background: var(--vibe-bg-surface);
++  border: 1px solid var(--vibe-border-soft);
++  border-radius: var(--vibe-radius-lg);
++  padding: 18px;
++  display: flex;
++  flex-direction: column;
++  gap: 16px;
++  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
++}
++
++.ai-header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 16px;
++}
++
++.title-group {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  color: var(--vibe-text-primary);
++}
++
++.title-group h3 {
++  margin: 0;
++  font-size: 18px;
++}
++
++.title-group p {
++  margin: 4px 0 0;
++  font-size: 12px;
++  color: var(--vibe-text-muted);
++}
++
++.language-select {
++  width: 140px;
++}
++
++.action-tabs {
++  display: flex;
++  gap: 8px;
++  flex-wrap: wrap;
++}
++
++.tab-button {
++  border-radius: 999px;
++  padding: 4px 14px;
++}
++
++.action-input {
++  width: 100%;
++}
++
++.action-footer {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 12px;
++}
++
++.helper {
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  font-size: 12px;
++  color: var(--vibe-text-muted);
++}
++</style>
+diff --git a/src/components/history/HistoryItem.vue b/src/components/history/HistoryItem.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..b34e630480e535400d12e90fcab17bfa8bdf1a5f
+--- /dev/null
++++ b/src/components/history/HistoryItem.vue
+@@ -0,0 +1,197 @@
++<script setup lang="ts">
++import { computed } from "vue";
++import type { ClipItem } from "@/types/history";
++import { ClipKind } from "@/types/history";
++import MdiPinOutline from "~icons/mdi/pin-outline";
++import MdiPin from "~icons/mdi/pin";
++import MdiStarOutline from "~icons/mdi/star-outline";
++import MdiStar from "~icons/mdi/star";
++import MdiTrashCan from "~icons/mdi/trash-can-outline";
++import MdiContentCopy from "~icons/mdi/content-copy";
++
++const props = defineProps<{
++  item: ClipItem;
++}>();
++
++const emits = defineEmits<{
++  (e: "copy", item: ClipItem): void;
++  (e: "pin", item: ClipItem): void;
++  (e: "favorite", item: ClipItem): void;
++  (e: "remove", item: ClipItem): void;
++}>();
++
++const kindLabel = computed(() => {
++  switch (props.item.kind) {
++    case ClipKind.Image:
++      return "图像";
++    case ClipKind.File:
++      return "文件";
++    default:
++      return "文本";
++  }
++});
++
++const previewText = computed(() => {
++  if (props.item.kind === ClipKind.Image) {
++    return props.item.preview ?? "粘贴的图像";
++  }
++  if (props.item.kind === ClipKind.File) {
++    return props.item.preview ?? props.item.content;
++  }
++  const text = props.item.content;
++  if (text.length <= 200) return text;
++  return `${text.slice(0, 200)}…`;
++});
++
++function handleCopy() {
++  emits("copy", props.item);
++}
++
++function handlePin() {
++  emits("pin", props.item);
++}
++
++function handleFavorite() {
++  emits("favorite", props.item);
++}
++
++function handleRemove() {
++  emits("remove", props.item);
++}
++</script>
++
++<template>
++  <div class="history-item" :class="{ pinned: item.isPinned, favorite: item.isFavorite }">
++    <div class="item-head">
++      <div class="item-meta">
++        <span class="kind-chip">{{ kindLabel }}</span>
++        <span class="timestamp">{{ new Date(item.updatedAt).toLocaleString() }}</span>
++      </div>
++      <div class="item-actions">
++        <n-tooltip trigger="hover">
++          <template #trigger>
++            <n-button quaternary size="tiny" circle @click.stop="handlePin">
++              <n-icon :component="item.isPinned ? MdiPin : MdiPinOutline" />
++            </n-button>
++          </template>
++          <span>{{ item.isPinned ? '取消置顶' : '置顶' }}</span>
++        </n-tooltip>
++        <n-tooltip trigger="hover">
++          <template #trigger>
++            <n-button quaternary size="tiny" circle @click.stop="handleFavorite">
++              <n-icon :component="item.isFavorite ? MdiStar : MdiStarOutline" />
++            </n-button>
++          </template>
++          <span>{{ item.isFavorite ? '取消收藏' : '收藏' }}</span>
++        </n-tooltip>
++        <n-tooltip trigger="hover">
++          <template #trigger>
++            <n-button quaternary size="tiny" circle @click.stop="handleCopy">
++              <n-icon :component="MdiContentCopy" />
++            </n-button>
++          </template>
++          <span>复制</span>
++        </n-tooltip>
++        <n-tooltip trigger="hover">
++          <template #trigger>
++            <n-button quaternary size="tiny" circle @click.stop="handleRemove">
++              <n-icon :component="MdiTrashCan" />
++            </n-button>
++          </template>
++          <span>删除</span>
++        </n-tooltip>
++      </div>
++    </div>
++    <div class="item-body">
++      <div v-if="item.kind === ClipKind.Image" class="image-preview">
++        <img :src="`data:image/png;base64,${item.content}`" alt="Clipboard image preview" />
++      </div>
++      <p v-else class="text-preview">{{ previewText }}</p>
++    </div>
++    <div v-if="item.extra" class="item-extra">{{ item.extra }}</div>
++  </div>
++</template>
++
++<style scoped>
++.history-item {
++  background: var(--vibe-bg-surface);
++  border-radius: var(--vibe-radius-lg);
++  padding: 18px;
++  border: 1px solid var(--vibe-border-soft);
++  transition: transform var(--vibe-transition), box-shadow var(--vibe-transition);
++  display: flex;
++  flex-direction: column;
++  gap: 12px;
++}
++
++.history-item:hover {
++  transform: translateY(-2px);
++  box-shadow: var(--vibe-shadow-soft);
++}
++
++.history-item.pinned {
++  border-color: rgba(81, 97, 255, 0.32);
++}
++
++.history-item.favorite {
++  border-color: rgba(255, 196, 84, 0.42);
++}
++
++.item-head {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  gap: 12px;
++}
++
++.item-meta {
++  display: flex;
++  align-items: center;
++  gap: 10px;
++  font-size: 12px;
++  color: var(--vibe-text-muted);
++}
++
++.kind-chip {
++  padding: 2px 8px;
++  border-radius: 999px;
++  background: rgba(81, 97, 255, 0.12);
++  color: rgba(38, 47, 110, 0.8);
++  font-weight: 600;
++}
++
++.item-actions {
++  display: flex;
++  gap: 6px;
++}
++
++.text-preview {
++  margin: 0;
++  color: var(--vibe-text-primary);
++  line-height: var(--line-height, 1.5);
++  white-space: pre-wrap;
++  word-break: break-word;
++}
++
++.image-preview {
++  border-radius: var(--vibe-radius-md);
++  overflow: hidden;
++  max-height: 200px;
++  display: flex;
++  justify-content: center;
++  background: rgba(0, 0, 0, 0.05);
++}
++
++.image-preview img {
++  max-width: 100%;
++  object-fit: contain;
++}
++
++.item-extra {
++  font-size: 12px;
++  color: var(--vibe-text-muted);
++  background: rgba(81, 97, 255, 0.08);
++  border-radius: var(--vibe-radius-md);
++  padding: 8px 10px;
++}
++</style>
+diff --git a/src/components/layout/AppSidebar.vue b/src/components/layout/AppSidebar.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..51c9a76a451e14c53e33636d93288d15dc764904
+--- /dev/null
++++ b/src/components/layout/AppSidebar.vue
+@@ -0,0 +1,206 @@
++<script setup lang="ts">
++import { computed } from "vue";
++import { useRoute, useRouter } from "vue-router";
++import { useHistoryStore } from "@/store/history";
++import { useSettingsStore } from "@/store/settings";
++import AppInfo from "@/AppInfo";
++import MdiHistory from "~icons/mdi/history";
++import MdiCogOutline from "~icons/mdi/cog-outline";
++import MdiPauseCircleOutline from "~icons/mdi/pause-circle-outline";
++import MdiPlayCircleOutline from "~icons/mdi/play-circle-outline";
++import MdiCloudOffOutline from "~icons/mdi/cloud-off-outline";
++import MdiCloudCheckOutline from "~icons/mdi/cloud-check-outline";
++
++const router = useRouter();
++const route = useRoute();
++const history = useHistoryStore();
++const settings = useSettingsStore();
++
++const navItems = [
++  { key: "history", label: "历史记录", icon: MdiHistory, path: "/" },
++  { key: "settings", label: "设置", icon: MdiCogOutline, path: "/settings" },
++];
++
++const activeKey = computed(() => (route.name as string) ?? "history");
++
++function navigate(path: string) {
++  if (route.path !== path) {
++    router.push(path);
++  }
++}
++
++async function toggleListening() {
++  await history.setListening(!history.listening.value);
++}
++
++async function toggleOffline() {
++  settings.offlineMode.value = !settings.offlineMode.value;
++}
++</script>
++
++<template>
++  <aside class="sidebar">
++    <div class="brand">
++      <div class="brand-icon">⎋</div>
++      <div class="brand-meta">
++        <h1>VibeClip Pro</h1>
++        <p>精致而冷静的剪贴板伴侣</p>
++      </div>
++    </div>
++    <nav class="sidebar-nav">
++      <button
++        v-for="item in navItems"
++        :key="item.key"
++        :class="['nav-item', activeKey === item.key ? 'active' : '']"
++        @click="navigate(item.path)"
++      >
++        <n-icon size="18" :component="item.icon" />
++        <span>{{ item.label }}</span>
++      </button>
++    </nav>
++    <div class="sidebar-actions">
++      <div class="action-row">
++        <div class="action-meta">
++          <p class="action-title">监听剪贴板</p>
++          <span class="action-desc">
++            <n-icon size="14" :component="history.listening ? MdiPlayCircleOutline : MdiPauseCircleOutline" />
++            {{ history.listening ? '实时记录' : '暂停中' }}
++          </span>
++        </div>
++        <n-switch :value="history.listening.value" @update:value="toggleListening" size="small" />
++      </div>
++      <div class="action-row">
++        <div class="action-meta">
++          <p class="action-title">离线模式</p>
++          <span class="action-desc">
++            <n-icon size="14" :component="settings.offlineMode ? MdiCloudOffOutline : MdiCloudCheckOutline" />
++            {{ settings.offlineMode ? '已断开 AI 服务' : '连接服务' }}
++          </span>
++        </div>
++        <n-switch :value="settings.offlineMode.value" @update:value="toggleOffline" size="small" />
++      </div>
++    </div>
++    <footer class="sidebar-footer">
++      <span>版本 {{ AppInfo.version }}</span>
++      <span class="muted">剪贴板条目 {{ history.items.length }}</span>
++    </footer>
++  </aside>
++</template>
++
++<style scoped>
++.sidebar {
++  width: 220px;
++  padding: 28px 24px;
++  display: flex;
++  flex-direction: column;
++  justify-content: space-between;
++  background: var(--vibe-sidebar-bg);
++  color: var(--vibe-sidebar-text);
++  border-top-right-radius: var(--vibe-radius-xl);
++  border-bottom-right-radius: var(--vibe-radius-xl);
++  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
++}
++
++.brand {
++  display: flex;
++  align-items: center;
++  gap: 16px;
++  margin-bottom: 32px;
++}
++
++.brand-icon {
++  width: 52px;
++  height: 52px;
++  border-radius: 18px;
++  background: rgba(255, 255, 255, 0.18);
++  display: grid;
++  place-items: center;
++  font-size: 24px;
++  font-weight: 700;
++  color: #ffffff;
++}
++
++.brand-meta h1 {
++  margin: 0;
++  font-size: 20px;
++  font-weight: 700;
++}
++
++.brand-meta p {
++  margin: 4px 0 0;
++  font-size: 12px;
++  color: var(--vibe-sidebar-muted);
++}
++
++.sidebar-nav {
++  display: flex;
++  flex-direction: column;
++  gap: 12px;
++}
++
++.nav-item {
++  border: none;
++  background: transparent;
++  color: inherit;
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  padding: 10px 14px;
++  border-radius: var(--vibe-radius-md);
++  font-size: 14px;
++  transition: background var(--vibe-transition), transform var(--vibe-transition);
++  cursor: pointer;
++}
++
++.nav-item:hover {
++  background: rgba(255, 255, 255, 0.18);
++  transform: translateX(2px);
++}
++
++.nav-item.active {
++  background: rgba(255, 255, 255, 0.28);
++  box-shadow: 0 8px 18px rgba(12, 27, 56, 0.18);
++}
++
++.sidebar-actions {
++  display: flex;
++  flex-direction: column;
++  gap: 16px;
++  margin-top: auto;
++  padding-top: 32px;
++}
++
++.action-row {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 12px;
++  background: rgba(255, 255, 255, 0.14);
++  border-radius: var(--vibe-radius-lg);
++  padding: 12px 16px;
++}
++
++.action-title {
++  margin: 0;
++  font-size: 14px;
++  font-weight: 600;
++}
++
++.action-desc {
++  font-size: 12px;
++  color: var(--vibe-sidebar-muted);
++}
++
++.sidebar-footer {
++  margin-top: 32px;
++  display: flex;
++  flex-direction: column;
++  gap: 4px;
++  font-size: 12px;
++  color: var(--vibe-sidebar-muted);
++}
++
++.sidebar-footer .muted {
++  opacity: 0.85;
++}
++</style>
+diff --git a/src/index.css b/src/index.css
+index c024c4d99f97b38f30e6d5c3941c8e33ba9f35a8..0b270a8e3988c5b7490ccf4b371cf115c9c8da06 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -1,107 +1,60 @@
++@import "./styles/theme.css";
+ @import "tailwindcss";
+ @import "tailwindcss-animated";
+ 
++html,
++body,
+ #app {
+-    width: 100%;
+-    height: 100%;
++  background-color: transparent !important;
++  height: 100%;
++  width: 100%;
++  overflow: hidden;
+ }
+ 
+-html, body, #app {
+-    background-color: transparent !important;
+-    overflow: hidden;
++body {
++  margin: 0;
+ }
+ 
+-@layer utilities {
+-    /* Hide scrollbar for Chrome, Safari and Opera */
+-    .no-scrollbar::-webkit-scrollbar {
+-        display: none;
+-    }
+-    /* Hide scrollbar for IE, Edge and Firefox */
+-    .no-scrollbar {
+-        -ms-overflow-style: none; /* IE and Edge */
+-        scrollbar-width: none; /* Firefox */
+-    }
+-    .thin-scrollbar::-webkit-scrollbar {
+-        width: 5px;
+-        height: 5px;
+-    }
+-    .thin-scrollbar::-webkit-scrollbar-thumb {
+-        background-color: #4e4e4e;
+-        border-radius: 2px;
+-    }
++::-webkit-scrollbar {
++  width: 6px;
++  height: 6px;
+ }
+ 
+-
+-.markdown-align {
+-    overflow-x: hidden;
+-    overflow-y: auto;
+-}
+-.markdown-align pre,
+-.markdown-align code {
+-    white-space: pre-wrap;
+-    word-wrap: break-word;
+-}
+-.markdown-align h1 {
+-    font-size: 1.5em;
+-    text-align: left;
+-}
+-.markdown-align h2 {
+-    font-size: 1.3em;
+-}
+-.markdown-align h3 {
+-    font-size: 1.1em;
+-}
+-.markdown-align h4 {
+-    font-size: 1em;
+-}
+-.markdown-align h5 {
+-    font-size: 0.9em;
+-}
+-.markdown-align h6 {
+-    font-size: 0.8em;
+-}
+-.markdown-align hr {
+-    border: none;
+-    border-top: 3px solid #cccccc79;
+-    margin: 10px 0;
++::-webkit-scrollbar-track {
++  background: transparent;
+ }
+-.markdown-align blockquote {
+-    border-left: 4px solid #ccc;
+-    padding: 0 15px;
+-    margin: 0;
+-}
+-.markdown-align ul {
+-    list-style-type: disc;
+-    padding-left: 20px;
++
++::-webkit-scrollbar-thumb {
++  background: rgba(81, 97, 255, 0.28);
++  border-radius: 999px;
+ }
+-.markdown-align ol {
+-    list-style-type: decimal;
+-    padding-left: 20px;
++
++.dark ::-webkit-scrollbar-thumb {
++  background: rgba(122, 209, 245, 0.36);
+ }
+-.markdown-align p {
+-    margin: 0;
+-    padding: 0;
++
++.no-scrollbar::-webkit-scrollbar {
++  display: none;
+ }
+-.markdown-align a {
+-    color: #007bff;
+-    text-decoration: none;
++
++.no-scrollbar {
++  scrollbar-width: none;
+ }
+-.markdown-align a:hover {
+-    text-decoration: underline;
++
++.thin-scrollbar::-webkit-scrollbar {
++  width: 5px;
++  height: 5px;
+ }
+-.markdown-align code {
+-    background-color: #f8f9fa1a;
+-    border-radius: 3px;
+-    padding: 2px 4px;
++
++.thin-scrollbar::-webkit-scrollbar-thumb {
++  background-color: rgba(23, 35, 61, 0.25);
++  border-radius: 2px;
+ }
+-.markdown-align pre {
+-    background-color: #f8f9fa1a;
+-    border-radius: 3px;
+-    padding: 5px;
+-    margin: 3px 0;
+-    overflow: auto;
++
++.dark .thin-scrollbar::-webkit-scrollbar-thumb {
++  background-color: rgba(244, 249, 255, 0.24);
+ }
+-.markdown-align pre code {
+-    background-color: transparent;
+-    padding: 0;
++
++.text-muted {
++  color: var(--vibe-text-muted);
+ }
+diff --git a/src/main.ts b/src/main.ts
+index 85882485de874c01d7a1675271bf3a14ed30e403..53bdf2881ab340f956f4dab3bf55822d9a3959c0 100644
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -1,15 +1,19 @@
+ import { createApp } from "vue";
++import { createRouter, createWebHistory } from "vue-router";
++import { createPinia } from "pinia";
+ import App from "./App.vue";
+-import './index.css';
+-
+-import { createWebHistory, createRouter } from 'vue-router'
+-import { routes } from './routes';
++import "./index.css";
++import { routes } from "./router";
+ 
+ const router = createRouter({
+-    history: createWebHistory(),
+-    routes,
+-})
++  history: createWebHistory(),
++  routes,
++  scrollBehavior() {
++    return { top: 0 };
++  },
++});
+ 
+-createApp(App)
+-    .use(router)
+-    .mount("#app");
++const app = createApp(App);
++app.use(createPinia());
++app.use(router);
++app.mount("#app");
+diff --git a/src/pages/History.vue b/src/pages/History.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..e9496f6b40fd0a5f3440fcc2dfa5063b55a82b02
+--- /dev/null
++++ b/src/pages/History.vue
+@@ -0,0 +1,343 @@
++<script setup lang="ts">
++import { computed, onBeforeUnmount, onMounted, ref } from "vue";
++import { useMessage } from "naive-ui";
++import { readText } from "@tauri-apps/plugin-clipboard-manager";
++import AppSidebar from "@/components/layout/AppSidebar.vue";
++import HistoryItem from "@/components/history/HistoryItem.vue";
++import AiQuickActions from "@/components/ai/AiQuickActions.vue";
++import { useHistoryStore } from "@/store/history";
++import { useSettingsStore } from "@/store/settings";
++import { ClipKind, type AiActionKind } from "@/types/history";
++
++const history = useHistoryStore();
++const settings = useSettingsStore();
++const message = useMessage();
++
++const searchValue = computed({
++  get: () => history.searchTerm.value,
++  set: value => {
++    history.searchTerm.value = value;
++    history.scheduleFetch();
++  },
++});
++
++const capturing = ref(false);
++const clipboardPreview = ref("");
++
++async function syncSystemClipboard() {
++  try {
++    capturing.value = true;
++    clipboardPreview.value = await readText();
++  } catch (error) {
++    console.warn("Failed to read clipboard", error);
++  } finally {
++    capturing.value = false;
++  }
++}
++
++function handlePaste(event: ClipboardEvent) {
++  const data = event.clipboardData;
++  if (!data) return;
++  const text = data.getData("text/plain");
++  if (text) {
++    history.insertClip({
++      kind: ClipKind.Text,
++      text,
++      preview: text.slice(0, 120),
++    });
++    return;
++  }
++  const items = Array.from(data.items ?? []);
++  for (const item of items) {
++    if (item.type.startsWith("image/")) {
++      const file = item.getAsFile();
++      if (!file) continue;
++      const reader = new FileReader();
++      reader.onload = async () => {
++        const result = reader.result as string;
++        const base64 = result.includes(",") ? result.split(",")[1] : result;
++        await history.insertClip({
++          kind: ClipKind.Image,
++          imageBase64: base64,
++          preview: file.name,
++        });
++      };
++      reader.readAsDataURL(file);
++      break;
++    }
++  }
++}
++
++async function handleAiRun(payload: {
++  action: AiActionKind;
++  input: string;
++  language: string;
++  customPrompt?: string;
++}) {
++  if (!settings.apiKey.value) {
++    message.error("请先在设置中配置 OpenAI 兼容接口 Key");
++    return;
++  }
++  try {
++    await history.runAiAction({
++      action: payload.action,
++      input: payload.input,
++      language: payload.language,
++      customPrompt: payload.customPrompt,
++      apiKey: settings.apiKey.value,
++      baseUrl: settings.apiBaseUrl.value,
++      model: settings.model.value,
++      temperature: settings.temperature.value,
++    });
++    message.success("AI 操作已完成并写入剪贴板");
++  } catch (error) {
++    message.error((error as Error).message ?? "AI 操作失败");
++  }
++}
++
++onMounted(async () => {
++  await history.syncStatus();
++  await history.refresh();
++  await syncSystemClipboard();
++  window.addEventListener("paste", handlePaste);
++});
++
++onBeforeUnmount(() => {
++  window.removeEventListener("paste", handlePaste);
++});
++
++function handleFilterChange(value: string) {
++  history.filter.value = value as any;
++  history.scheduleFetch();
++}
++
++async function handleCopy(item: typeof history.items.value[number]) {
++  await history.copyClip(item);
++  message.success("已写入系统剪贴板");
++}
++
++async function handlePin(item: typeof history.items.value[number]) {
++  await history.updateFlags(item.id, { pinned: !item.isPinned });
++}
++
++async function handleFavorite(item: typeof history.items.value[number]) {
++  await history.updateFlags(item.id, { favorite: !item.isFavorite });
++}
++
++async function handleRemove(item: typeof history.items.value[number]) {
++  await history.removeClip(item.id);
++  message.success("已删除");
++}
++
++async function handleSavePreview() {
++  if (!clipboardPreview.value.trim()) return;
++  await history.captureText(clipboardPreview.value);
++  message.success("已保存至历史");
++}
++</script>
++
++<template>
++  <div class="history-page">
++    <AppSidebar />
++    <section class="main">
++      <header class="top-bar">
++        <n-input
++          v-model:value="searchValue"
++          placeholder="搜索历史内容或使用 Ctrl+Shift+V 呼出"
++          clearable
++          size="large"
++          @clear="history.refresh()"
++        />
++        <div class="top-actions">
++          <n-button quaternary size="small" @click="history.refresh()">刷新</n-button>
++          <n-button quaternary size="small" @click="history.importHistory">导入</n-button>
++          <n-button quaternary size="small" @click="history.exportHistory" :loading="history.isExporting">导出</n-button>
++          <n-popconfirm @positive-click="history.clearHistory">
++            <template #trigger>
++              <n-button size="small" tertiary type="error">清空</n-button>
++            </template>
++            确认清空所有历史记录？
++          </n-popconfirm>
++        </div>
++      </header>
++
++      <div class="top-grid">
++        <div class="live-card">
++          <div class="card-header">
++            <div>
++              <h2>系统剪贴板</h2>
++              <p>随时同步当前剪贴板内容</p>
++            </div>
++            <n-button size="tiny" secondary :loading="capturing" @click="syncSystemClipboard">同步</n-button>
++          </div>
++          <div class="card-body">
++            <p v-if="clipboardPreview" class="preview-text">{{ clipboardPreview }}</p>
++            <p v-else class="placeholder">剪贴板暂无文本，可在应用中粘贴图片或文件以自动收集。</p>
++          </div>
++          <div class="card-footer">
++            <n-button size="small" type="primary" :disabled="!clipboardPreview" @click="handleSavePreview">
++              保存到历史
++            </n-button>
++          </div>
++        </div>
++        <AiQuickActions
++          :loading="history.aiBusy"
++          :source-text="history.latest?.content ?? clipboardPreview"
++          :on-run="handleAiRun"
++        />
++      </div>
++
++      <section class="filters">
++        <n-segmented
++          :value="history.filter.value"
++          size="small"
++          :options="[
++            { label: '全部', value: 'all' },
++            { label: '置顶', value: 'pinned' },
++            { label: '收藏', value: 'favorites' },
++            { label: '文本', value: 'text' },
++            { label: '图像', value: 'images' },
++            { label: '文件', value: 'files' },
++          ]"
++          @update:value="handleFilterChange"
++        />
++        <span class="result-count">共 {{ history.filteredItems.length }} 条记录</span>
++      </section>
++
++      <section class="history-list" :style="{ '--line-height': settings.lineHeight }">
++        <transition-group name="fade" tag="div" class="history-grid">
++          <HistoryItem
++            v-for="item in history.filteredItems"
++            :key="item.id"
++            :item="item"
++            @copy="handleCopy"
++            @pin="handlePin"
++            @favorite="handleFavorite"
++            @remove="handleRemove"
++          />
++        </transition-group>
++        <n-empty v-if="!history.filteredItems.length && !history.isLoading" description="还没有保存的剪贴板内容">
++          <template #extra>
++            <n-button size="small" @click="syncSystemClipboard">立即同步</n-button>
++          </template>
++        </n-empty>
++      </section>
++    </section>
++  </div>
++</template>
++
++<style scoped>
++.history-page {
++  display: flex;
++  height: 100%;
++  width: 100%;
++}
++
++.main {
++  flex: 1;
++  padding: 28px 32px;
++  display: flex;
++  flex-direction: column;
++  gap: 24px;
++  overflow: hidden;
++}
++
++.top-bar {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 16px;
++}
++
++.top-bar :deep(.n-input) {
++  flex: 1;
++}
++
++.top-actions {
++  display: flex;
++  gap: 8px;
++}
++
++.top-grid {
++  display: grid;
++  grid-template-columns: 1fr 1fr;
++  gap: 24px;
++}
++
++.live-card {
++  background: var(--vibe-bg-surface);
++  border-radius: var(--vibe-radius-lg);
++  border: 1px solid var(--vibe-border-soft);
++  padding: 18px;
++  display: flex;
++  flex-direction: column;
++  gap: 14px;
++}
++
++.card-header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++}
++
++.card-header h2 {
++  margin: 0;
++  font-size: 20px;
++}
++
++.card-header p {
++  margin: 4px 0 0;
++  font-size: 12px;
++  color: var(--vibe-text-muted);
++}
++
++.card-body {
++  min-height: 90px;
++}
++
++.preview-text {
++  margin: 0;
++  font-size: 14px;
++  line-height: 1.6;
++  color: var(--vibe-text-primary);
++  white-space: pre-wrap;
++}
++
++.placeholder {
++  margin: 0;
++  font-size: 13px;
++  color: var(--vibe-text-muted);
++}
++
++.card-footer {
++  display: flex;
++  justify-content: flex-end;
++}
++
++.filters {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 16px;
++}
++
++.result-count {
++  font-size: 12px;
++  color: var(--vibe-text-muted);
++}
++
++.history-list {
++  flex: 1;
++  overflow: hidden;
++  display: flex;
++  flex-direction: column;
++}
++
++.history-grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
++  gap: 18px;
++  overflow-y: auto;
++  padding-right: 4px;
++}
++</style>
+diff --git a/src/pages/Panel.vue b/src/pages/Panel.vue
+index 340fa402772fb32e3ed775fdc33886aff0996884..6c8f6c34f238f471c7cbc70da1a72f9b09fc7bfd 100644
+--- a/src/pages/Panel.vue
++++ b/src/pages/Panel.vue
+@@ -1,1061 +1,124 @@
+ <script setup lang="ts">
+-import {
+-    onBeforeUnmount,
+-    onMounted,
+-    computed,
+-    ref,
+-    watch,
+-    nextTick,
+-} from 'vue';
+-import { type Snippet, useConfig } from '@/composables/useConfig';
+-import { StopToken, useAI } from '@/composables/useAI';
+-import { useClipboard } from '@/composables/useClipboard';
+-import { type PanelPage, usePanelWindow } from '@/composables/usePanelWindow';
+-import { webviewWindow } from '@tauri-apps/api';
+-import SolarTextFieldFocusLineDuotone from '~icons/solar/text-field-focus-line-duotone';
+-import SolarTextBoldDuotone from '~icons/solar/text-bold-duotone';
+-import SolarCodeLineDuotone from '~icons/solar/code-line-duotone';
+-import SolarPen2LineDuotone from '~icons/solar/pen-2-line-duotone';
+-import SolarCalculatorLineDuotone from '~icons/solar/calculator-line-duotone';
+-import SolarAltArrowLeftLineDuotone from '~icons/solar/alt-arrow-left-line-duotone';
+-import SolarAltArrowRightLineDuotone from '~icons/solar/alt-arrow-right-line-duotone';
+-import SolarNotificationUnreadLinesLineDuotone from '~icons/solar/notification-unread-lines-line-duotone';
+-import SolarCheckSquareLineDuotone from '~icons/solar/check-square-line-duotone';
+-import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop';
+-import SolarSettingsLineDuotone from '~icons/solar/settings-line-duotone';
+-import SolarChatLineLineDuotone from '~icons/solar/chat-line-line-duotone';
+-import SolarClipboardListLineDuotone from '~icons/solar/clipboard-list-line-duotone';
+-import SolarLinkMinimalistic2BoldDuotone from '~icons/solar/link-minimalistic-2-bold-duotone';
+-import SolarSquareTopDownLineDuotone from '~icons/solar/square-top-down-line-duotone';
+-import SolarCopyLineDuotone from '~icons/solar/copy-line-duotone';
+-import SolarDocumentTextLineDuotone from '~icons/solar/document-text-line-duotone';
+-import { simulatePaste } from '@/libs/bridges';
+-import AIChat from '@/components/AIChat.vue';
+-import { asString, fetchUrls } from '@/libs/utils';
+-import { openUrl } from '@tauri-apps/plugin-opener';
+-import { marked } from 'marked';
+-import HijackedATag from '@/components/HijackedATag.vue';
+-import Toast from '@/components/Toast.vue';
++import { computed, onMounted } from "vue";
++import { useHistoryStore } from "@/store/history";
++import { useSettingsStore } from "@/store/settings";
++import { useMessage } from "naive-ui";
++import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+ 
+-const { config, loadConfig, saveConfig } = useConfig();
+-const { generating, generatedContent, userPrompt, generateText } =
+-    useAI(config);
+-const clipboard = useClipboard();
+-const { content, contentPreview, stats, refresh, update } = clipboard;
+-const { page, showPreview, mouseInRange, gotoPage, setupWindowListeners } =
+-    usePanelWindow(clipboard);
++const history = useHistoryStore();
++const settings = useSettingsStore();
++const message = useMessage();
+ 
+-const vFocus = {
+-    mounted: (el: HTMLElement) => el.focus(),
+-};
++const items = computed(() => history.filteredItems.slice(0, 6));
+ 
+-const toast = ref();
+-
+-const mainView = new webviewWindow.WebviewWindow('main', {
+-    url: '/',
+-});
+-
+-const stopToken = ref<StopToken | null>(null);
+-
+-// 菜单焦点
+-const focusOn = ref(0);
+-
+-const useMarkdownRender = ref(false);
+-
+-const currentSnippet = ref({
+-    isNew: false,
+-    id: '',
+-    name: '',
+-    prompt: '',
+-    system: '',
+-    markdown: true,
+-    advanced: false,
+-});
+-
+-const foundUrls = ref<string[]>([]);
+-const selectedUrl = ref('');
+-
+-// 可保存状态
+-const savable = computed(() => {
+-    return ['edit', 'tojson', 'askai', 'snippets-ai'].includes(page.value);
+-});
+-
+-const handlePageChange = (page: PanelPage) => {
+-    if (page === 'snippets-ai') {
+-        useMarkdownRender.value = true;
+-    } else {
+-        useMarkdownRender.value = false;
+-    }
+-    if (['index', 'snippets', 'urls', 'urls-actions'].includes(page)) {
+-        focusOn.value = 0;
+-    }
+-    if (page === 'urls') {
+-        selectedUrl.value = '';
+-    }
+-    if (page === 'tojson') {
+-        userPrompt.value = '转换为JSON';
+-    } else {
+-        userPrompt.value = '';
+-    }
+-};
+-
+-export type Menu = {
+-    key: string;
+-    label: string;
+-    description: string;
+-    action: () => void;
+-    isSub?: boolean;
+-    autoClose?: boolean;
+-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+-    icon: any;
+-};
+-
+-const hasContent = computed(() => content.value.trim().length > 0);
+-// 菜单配置
+-const menus = computed<Menu[]>((): Menu[] => {
+-    selectedUrl.value = '';
+-    foundUrls.value = config.value.detect.enabled
+-        ? fetchUrls(content.value)
+-        : [];
+-    const list = [
+-        hasContent.value && config.value.common.enablePaste
+-            ? {
+-                  key: 'paste',
+-                  label: '粘贴',
+-                  description: '直接粘贴文本',
+-                  action: () => {
+-                      hideWindow().then(simulatePaste);
+-                  },
+-                  icon: SolarClipboardListLineDuotone,
+-              }
+-            : null,
+-        hasContent.value && config.value.common.enableCalc
+-            ? {
+-                  key: 'calc',
+-                  label: '统计',
+-                  description: `共计 ${content.value.length} 字符，${
+-                      content.value.split('\n').length
+-                  } 行，非空字符 ${
+-                      content.value.replace(/\s/g, '').length
+-                  } 字符`,
+-                  action: () => gotoPage('calc', handlePageChange),
+-                  isSub: true,
+-                  icon: SolarCalculatorLineDuotone,
+-              }
+-            : null,
+-        config.value.common.enableEdit
+-            ? {
+-                  key: 'edit',
+-                  label: '编辑',
+-                  description: '直接修改内容',
+-                  action: () => gotoPage('edit', handlePageChange),
+-                  isSub: true,
+-                  icon: SolarTextFieldFocusLineDuotone,
+-              }
+-            : null,
+-        foundUrls.value && foundUrls.value.length > 0
+-            ? {
+-                  key: 'urls',
+-                  label: '提取链接...',
+-                  description: `发现 ${foundUrls.value.length} 个可能的链接`,
+-                  action: () => {
+-                      gotoPage('urls', handlePageChange);
+-                  },
+-                  isSub: true,
+-                  icon: SolarLinkMinimalistic2BoldDuotone,
+-              }
+-            : null,
+-        hasContent.value && config.value.common.enableToText
+-            ? {
+-                  key: 'text',
+-                  label: '转为纯文本',
+-                  description: '重新复制为纯文本',
+-                  action: () => {
+-                      update(content.value);
+-                      toast.value.sendToast('已替换剪贴板内容');
+-                  },
+-                  icon: SolarTextBoldDuotone,
+-              }
+-            : null,
+-    ];
+-    if (config.value?.ai.enabled) {
+-        list.push(
+-            hasContent.value && config.value.ai.enableToJson
+-                ? {
+-                      key: 'json',
+-                      label: '转为JSON',
+-                      description: '使用AI将内容转为JSON',
+-                      action: () => gotoPage('tojson', handlePageChange),
+-                      isSub: true,
+-                      icon: SolarCodeLineDuotone,
+-                  }
+-                : null,
+-            hasContent.value && config.value.ai.enableAskAI
+-                ? {
+-                      key: 'askai',
+-                      label: '修改或处理...',
+-                      description: '让AI帮忙处理数据或询问有关问题',
+-                      action: () => gotoPage('askai', handlePageChange),
+-                      isSub: true,
+-                      icon: SolarPen2LineDuotone,
+-                  }
+-                : null,
+-            config.value.ai.enableAIChat
+-                ? {
+-                      key: 'chat',
+-                      label: '与AI对话',
+-                      description: '基于剪贴板内容与AI进行可持续的对话',
+-                      isSub: true,
+-                      icon: SolarChatLineLineDuotone,
+-                      action: () => gotoPage('chat', handlePageChange),
+-                  }
+-                : null,
+-            config.value.ai.enableAISnipets
+-                ? {
+-                      key: 'snippets',
+-                      label: '快速AI片段',
+-                      description: '保存的AI请求片段',
+-                      action: () => gotoPage('snippets', handlePageChange),
+-                      isSub: true,
+-                      icon: SolarNotificationUnreadLinesLineDuotone,
+-                  }
+-                : null
+-        );
+-    }
+-    return list.filter(it => !!it);
+-});
+-
+-const linkMenu = computed<Menu[]>(() => {
+-    return [
+-        {
+-            key: 'copy',
+-            label: '复制',
+-            description: '用此链接替换剪贴板内容',
+-            action: () => {
+-                update(selectedUrl.value);
+-                hideWindow();
+-            },
+-            icon: SolarCopyLineDuotone,
+-        },
+-        {
+-            key: 'open',
+-            label: '打开',
+-            description: '打开此链接',
+-            action: () => {
+-                openUrl(selectedUrl.value);
+-                hideWindow();
+-            },
+-            icon: SolarSquareTopDownLineDuotone,
+-        },
+-        config.value?.ai.enabled && config.value?.ai.enableWebCrawl
+-            ? {
+-                  key: 'askAi',
+-                  label: '总结页面',
+-                  description: '尝试让 AI 总结链接',
+-                  action: () => {
+-                      gotoPage('askai', handlePageChange);
+-                      startAskAI('总结这个链接的页面内容', selectedUrl.value);
+-                  },
+-                  icon: SolarDocumentTextLineDuotone,
+-                  isSub: true,
+-              }
+-            : null,
+-    ].filter(it => !!it);
+-});
+-
+-async function executeLinkMenu(action: () => void) {
+-    try {
+-        await action();
+-    } catch (error) {
+-        console.error(error);
+-        hideWindow();
+-    }
+-}
+-
+-function runSnippet(snippet: Snippet) {
+-    gotoPage('snippets-ai', handlePageChange);
+-    currentSnippet.value = {
+-        ...snippet,
+-        markdown: snippet.markdown ?? false,
+-        advanced: snippet.advanced ?? false,
+-        isNew: false,
+-    };
+-    useMarkdownRender.value = snippet.markdown ?? false;
+-    createTask(
+-        snippet.system.replace(/{{\s*clipboard\s*}}/g, content.value),
+-        snippet.advanced
+-            ? snippet.prompt.replace(/{{\s*clipboard\s*}}/g, content.value)
+-            : `用户指令:\n${snippet.prompt}\n\n剪贴板内容:\n${content.value}\n\n输出:\n`
+-    );
+-}
+-
+-// 执行菜单动作
+-function executeMenu(key: string) {
+-    const menu = menus.value.find(menu => menu.key === key);
+-    if (menu) {
+-        menu.action();
+-        if (menu.autoClose) {
+-            hideWindow();
+-        }
+-    }
+-}
+-
+-// AI 相关页面Enter键处理
+-function handleAIPageEnter() {
+-    if (generating.value) {
+-        abortTask();
+-    } else if (userPrompt.value?.trim().length > 0) {
+-        if (page.value === 'tojson') {
+-            startConvertToJson();
+-        } else if (page.value === 'askai') {
+-            startAskAI();
+-        }
+-    }
+-}
+-
+-function selectUrl(url: string) {
+-    selectedUrl.value = url;
+-    gotoPage('urls-actions', handlePageChange);
+-}
+-
+-// 监听页面变化，自动聚焦到输入框
+-watch(page, newPage => {
+-    nextTick(() => {
+-        const selector =
+-            newPage === 'edit'
+-                ? '.edit-textarea'
+-                : ['tojson', 'askai'].includes(newPage)
+-                ? '.prompt-input'
+-                : null;
+-        const focusInput = selector
+-            ? (document.querySelector(selector) as HTMLElement)
+-            : null;
+-        focusInput?.focus();
+-    });
+-});
+-
+-// 扩展原有的listenKeydown函数
+-function listenKeydown(e: KeyboardEvent) {
+-    if (e.key === 'Escape') {
+-        if (page.value === 'index') {
+-            hideWindow();
+-        } else {
+-            handleBackAction();
+-        }
+-    }
+-    if (e.key === 'Enter' && e.ctrlKey && savable.value) {
+-        doSaveAction();
+-        return;
+-    }
+-
+-    if (
+-        document.activeElement?.tagName === 'INPUT' ||
+-        document.activeElement?.tagName === 'TEXTAREA'
+-    ) {
+-        return;
+-    }
+-
+-    // 上下键导航
+-    if (page.value === 'index') {
+-        if (e.key === 'ArrowUp') {
+-            if (focusOn.value < 0) {
+-                focusOn.value = menus.value.length - 1;
+-            } else {
+-                focusOn.value =
+-                    (focusOn.value - 1 + menus.value.length) %
+-                    menus.value.length;
+-            }
+-            document
+-                .querySelector(`#${menus.value[focusOn.value].key}`)
+-                ?.scrollIntoView({
+-                    behavior: 'smooth',
+-                    block: 'nearest',
+-                });
+-        }
+-        if (e.key === 'ArrowDown') {
+-            if (focusOn.value < 0) {
+-                focusOn.value = 0;
+-            } else {
+-                focusOn.value = (focusOn.value + 1) % menus.value.length;
+-            }
+-            document
+-                .querySelector(`#${menus.value[focusOn.value].key}`)
+-                ?.scrollIntoView({
+-                    behavior: 'smooth',
+-                    block: 'nearest',
+-                });
+-        }
+-    } else if (page.value === 'snippets') {
+-        if (e.key === 'ArrowUp') {
+-            if (focusOn.value < 0) {
+-                focusOn.value = config.value.snippets.length - 1;
+-            } else {
+-                focusOn.value =
+-                    (focusOn.value - 1 + config.value.snippets.length) %
+-                    config.value.snippets.length;
+-            }
+-            document
+-                .querySelector(`#${config.value.snippets[focusOn.value].id}`)
+-                ?.scrollIntoView({
+-                    behavior: 'smooth',
+-                    block: 'nearest',
+-                });
+-        }
+-        if (e.key === 'ArrowDown') {
+-            if (focusOn.value < 0) {
+-                focusOn.value = 0;
+-            } else {
+-                focusOn.value =
+-                    (focusOn.value + 1) % config.value.snippets.length;
+-            }
+-            document
+-                .querySelector(`#${config.value.snippets[focusOn.value].id}`)
+-                ?.scrollIntoView({
+-                    behavior: 'smooth',
+-                    block: 'nearest',
+-                });
+-        }
+-    } else if (page.value === 'urls') {
+-        if (e.key === 'ArrowUp') {
+-            if (focusOn.value < 0) {
+-                focusOn.value = foundUrls.value.length - 1;
+-            } else {
+-                focusOn.value =
+-                    (focusOn.value - 1 + foundUrls.value.length) %
+-                    foundUrls.value.length;
+-            }
+-            document.querySelector(`#url-${focusOn.value}`)?.scrollIntoView({
+-                behavior: 'smooth',
+-                block: 'nearest',
+-            });
+-        }
+-        if (e.key === 'ArrowDown') {
+-            if (focusOn.value < 0) {
+-                focusOn.value = 0;
+-            } else {
+-                focusOn.value = (focusOn.value + 1) % foundUrls.value.length;
+-            }
+-            document.querySelector(`#url-${focusOn.value}`)?.scrollIntoView({
+-                behavior: 'smooth',
+-                block: 'nearest',
+-            });
+-        }
+-    } else if (page.value === 'urls-actions') {
+-        if (e.key === 'ArrowUp') {
+-            if (focusOn.value < 0) {
+-                focusOn.value = linkMenu.value.length - 1;
+-            } else {
+-                focusOn.value =
+-                    (focusOn.value - 1 + linkMenu.value.length) %
+-                    linkMenu.value.length;
+-            }
+-        }
+-        if (e.key === 'ArrowDown') {
+-            if (focusOn.value < 0) {
+-                focusOn.value = 0;
+-            } else {
+-                focusOn.value = (focusOn.value + 1) % linkMenu.value.length;
+-            }
+-        }
+-    }
+-
+-    if (e.key === 'Enter' && focusOn.value >= 0) {
+-        if (page.value === 'index') executeMenu(menus.value[focusOn.value].key);
+-        else if (page.value === 'snippets') {
+-            const res = config.value.snippets[focusOn.value];
+-            if (res) runSnippet(res);
+-        } else if (page.value === 'urls') {
+-            const res = foundUrls.value[focusOn.value];
+-            if (res) {
+-                selectUrl(res);
+-            }
+-        } else if (page.value === 'urls-actions') {
+-            const res = linkMenu.value[focusOn.value];
+-            if (res) {
+-                executeLinkMenu(res.action);
+-            }
+-        }
+-    } else if (e.key === 'Enter' && ['tojson', 'askai'].includes(page.value)) {
+-        handleAIPageEnter();
+-        e.preventDefault();
+-    }
+-}
+-
+-const webview = new webviewWindow.WebviewWindow('context', {
+-    url: '/panel',
+-    width: 400,
+-    height: 456,
+-});
+-
+-function gotoCreateSnippet() {
+-    gotoPage('snippets-edit', handlePageChange);
+-    currentSnippet.value.isNew = true;
+-    currentSnippet.value.name = `AI片段 #${Math.round(Math.random() * 100)}`;
+-    currentSnippet.value.prompt =
+-        '剪贴板内容:\n{{clipboard}}\n\n用户指令:\n请把内容...';
+-    currentSnippet.value.system =
+-        '你的任务是分析用户的剪贴板数据。使用用户的指令和剪贴板内容回答问题。';
+-    currentSnippet.value.id = '';
+-    currentSnippet.value.markdown = true;
+-    currentSnippet.value.advanced = true;
++async function copyItem(id: number) {
++  const item = history.items.find(entry => entry.id === id);
++  if (!item) return;
++  await history.copyClip(item);
++  message.success("已复制到剪贴板");
+ }
+ 
+-function gotoEditSnippet(snippet: Snippet) {
+-    gotoPage('snippets-edit', handlePageChange);
+-    currentSnippet.value.isNew = false;
+-    currentSnippet.value.name = snippet.name;
+-    currentSnippet.value.prompt = snippet.prompt;
+-    currentSnippet.value.system = snippet.system;
+-    currentSnippet.value.id = snippet.id;
+-    currentSnippet.value.markdown = snippet.markdown ?? false;
+-    currentSnippet.value.advanced = snippet.advanced ?? false;
++async function pasteAndClose(id: number) {
++  await copyItem(id);
++  const current = getCurrentWebviewWindow();
++  await current.hide();
+ }
+ 
+-const snippetFormOK = computed(() => {
+-    if (currentSnippet.value.name.trim().length === 0) {
+-        return false;
+-    }
+-    if (currentSnippet.value.prompt.trim().length === 0) {
+-        return false;
+-    }
+-    if (currentSnippet.value.system.trim().length === 0) {
+-        return false;
+-    }
+-    return true;
++onMounted(async () => {
++  await settings.bootstrap();
++  await history.syncStatus();
++  if (!history.items.length) {
++    await history.refresh();
++  }
+ });
++</script>
+ 
+-function saveSnippet() {
+-    if (!snippetFormOK.value) {
+-        toast.value.sendToast('信息不完整');
+-        return;
+-    }
+-    if (currentSnippet.value.isNew) {
+-        currentSnippet.value.id = `n-${Math.random()}`;
+-        config.value.snippets.push({
+-            id: currentSnippet.value.id,
+-            name: currentSnippet.value.name,
+-            prompt: currentSnippet.value.prompt,
+-            system: currentSnippet.value.system,
+-            markdown: currentSnippet.value.markdown,
+-            advanced: currentSnippet.value.advanced,
+-        });
+-        currentSnippet.value.isNew = false;
+-    } else {
+-        const index = config.value.snippets.findIndex(
+-            s => s.id === currentSnippet.value.id
+-        );
+-        if (index >= 0) {
+-            config.value.snippets[index] = {
+-                id: currentSnippet.value.id,
+-                name: currentSnippet.value.name,
+-                prompt: currentSnippet.value.prompt,
+-                system: currentSnippet.value.system,
+-                markdown: currentSnippet.value.markdown,
+-                advanced: currentSnippet.value.advanced,
+-            };
+-        }
+-    }
+-    return saveConfig().then(() => toast.value.sendToast('保存片段成功'));
+-}
++<template>
++  <div class="panel">
++    <header class="panel-header">
++      <h2>VibeClip Pro</h2>
++      <p class="muted">最近剪贴板 · 快速粘贴</p>
++    </header>
++    <main class="panel-body">
++      <n-scrollbar style="max-height: 360px;">
++        <n-list hoverable>
++          <n-list-item v-for="item in items" :key="item.id" class="clip-item">
++            <div class="clip-meta">
++              <h3>{{ item.preview ?? item.content.slice(0, 60) }}</h3>
++              <p>{{ new Date(item.updatedAt).toLocaleTimeString() }}</p>
++            </div>
++            <div class="clip-actions">
++              <n-button size="tiny" secondary @click="copyItem(item.id)">复制</n-button>
++              <n-button size="tiny" type="primary" @click="pasteAndClose(item.id)">粘贴</n-button>
++            </div>
++          </n-list-item>
++        </n-list>
++      </n-scrollbar>
++    </main>
++    <footer class="panel-footer">
++      <span>Ctrl / Cmd + Shift + V</span>
++      <span>共 {{ history.items.length }} 条记录</span>
++    </footer>
++  </div>
++</template>
+ 
+-function upgradeSnippet(){
+-    currentSnippet.value.advanced = true;
+-    return saveSnippet();
++<style scoped>
++.panel {
++  padding: 18px 20px;
++  display: flex;
++  flex-direction: column;
++  gap: 16px;
++  min-height: 100%;
++  background: rgba(22, 27, 45, 0.86);
++  color: rgba(255, 255, 255, 0.92);
+ }
+ 
+-function deleteSnippet() {
+-    if (currentSnippet.value.id && !currentSnippet.value.isNew) {
+-        const index = config.value.snippets.findIndex(
+-            s => s.id === currentSnippet.value.id
+-        );
+-        if (index >= 0) {
+-            config.value.snippets.splice(index, 1);
+-            saveConfig().then(() => toast.value.sendToast('已删除片段'));
+-        }
+-    }
+-    gotoPage('snippets', handlePageChange);
++.panel-header h2 {
++  margin: 0;
++  font-size: 20px;
+ }
+ 
+-function hideWindow() {
+-    gotoPage('index');
+-    focusOn.value = 0;
+-    content.value = '';
+-    return webview.hide();
++.panel-header .muted {
++  margin: 6px 0 0;
++  font-size: 12px;
++  color: rgba(255, 255, 255, 0.6);
+ }
+ 
+-function abortTask() {
+-    stopToken.value?.stop();
++.panel-body {
++  flex: 1;
++  background: rgba(255, 255, 255, 0.08);
++  border-radius: 14px;
++  padding: 12px;
+ }
+ 
+-function clearTask() {
+-    stopToken.value?.stop();
+-    generatedContent.value = '';
++.clip-item {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 12px;
+ }
+ 
+-async function createTask(system: string, prompt: string) {
+-    clearTask();
+-    stopToken.value = new StopToken();
+-    try {
+-        return await generateText(system, prompt, stopToken.value);
+-    } catch (e) {
+-        console.error(e);
+-        toast.value.sendToast('AI 生成时遇到问题');
+-    }
++.clip-item h3 {
++  margin: 0;
++  font-size: 14px;
++  color: rgba(255, 255, 255, 0.92);
+ }
+ 
+-// AI 相关操作函数
+-const startConvertToJson = () =>
+-    createTask(
+-        '你的任务是重新格式化用户的剪贴板数据。使用用户的指令和剪贴板内容进行编辑。只输出重新格式化的内容，使用原始格式，不要使用markdown。',
+-        `用户指令:\n${userPrompt.value}\n\n剪贴板内容:\n${content.value}\n\n输出:\n`
+-    );
+-
+-const startAskAI = (presetPrompt?: string, text?: string) => {
+-    const cliptext = text ? text : content.value;
+-    const prompt = presetPrompt ? presetPrompt : userPrompt.value;
+-    userPrompt.value = prompt;
+-    return createTask(
+-        '你的任务是分析用户的剪贴板数据。使用用户的指令和剪贴板内容进行修改、处理、续写或回答问题。不要使用markdown。',
+-        `用户指令:\n${prompt}\n\n剪贴板内容:\n${cliptext}\n\n输出:\n`
+-    );
+-};
+-
+-// 保存操作处理
+-function doSaveAction() {
+-    switch (page.value) {
+-        case 'edit':
+-            update(content.value);
+-            gotoPage('index', handlePageChange);
+-            toast.value.sendToast('已替换剪贴板内容');
+-            break;
+-        case 'tojson':
+-        case 'askai':
+-        case 'snippets-ai':
+-            update(generatedContent.value);
+-            gotoPage('index', handlePageChange);
+-            toast.value.sendToast('已替换剪贴板内容');
+-            break;
+-    }
++.clip-item p {
++  margin: 4px 0 0;
++  font-size: 12px;
++  color: rgba(255, 255, 255, 0.5);
+ }
+ 
+-function handleBackAction() {
+-    switch (page.value) {
+-        case 'snippets-edit':
+-        case 'snippets-ai':
+-            gotoPage('snippets', handlePageChange);
+-            break;
+-        default:
+-            gotoPage('index', handlePageChange);
+-            break;
+-    }
++.clip-actions {
++  display: flex;
++  gap: 8px;
+ }
+ 
+-const openMainSettings = () => {
+-    mainView.show();
+-    mainView.setFocus();
+-};
+-
+-let unlistenFocus: () => void;
+-
+-// 生命周期钩子
+-onMounted(async () => {
+-    window.addEventListener('keydown', listenKeydown);
+-    await loadConfig(); // 首次加载配置
+-    unlistenFocus = await setupWindowListeners(hideWindow, loadConfig); // 传入 hideWindow 函数
+-    await refresh(); // 初始化时读取剪贴板内容
+-});
+-
+-onBeforeUnmount(() => {
+-    window.removeEventListener('keydown', listenKeydown);
+-    unlistenFocus?.();
+-});
+-</script>
+-
+-<template>
+-    <div
+-        class="panelroot flex flex-col size-full select-none bg-white/95 dark:bg-transparent dark:text-white"
+-        @mouseover="mouseInRange = true"
+-        @mouseleave="mouseInRange = false"
+-    >
+-        <div
+-            class="bg-neutral-500/10 dark:bg-black p-2"
+-            :class="[showPreview && hasContent ? 'h-[120px]' : 'h-[32px]']"
+-        >
+-            <div
+-                data-tauri-drag-region
+-                class="text-gray-800 dark:text-gray-400 h-6 relative"
+-            >
+-                <div
+-                    data-tauri-drag-region
+-                    class="cursor-move absolute top-1 left-1/2 -translate-x-1/2 w-10 h-2 rounded-lg bg-neutral-500 dark:bg-white/40"
+-                ></div>
+-                <SolarAltArrowLeftLineDuotone
+-                    class="inline hover:bg-gray-500/30 animate-fade-right animate-once animate-duration-300 animate-ease-out"
+-                    @click="handleBackAction"
+-                    v-if="page !== 'index'"
+-                />
+-                <span>剪贴板</span>
+-                <SolarSettingsLineDuotone
+-                    class="inline hover:bg-gray-500/30 float-end"
+-                    @click="openMainSettings"
+-                />
+-                <LineMdLoadingTwotoneLoop
+-                    class="inline hover:bg-gray-500/90 float-end animate-fade-left animate-once animate-duration-300 animate-ease-out"
+-                    v-if="generating"
+-                />
+-                <SolarCheckSquareLineDuotone
+-                    class="inline hover:bg-gray-500/90 float-end animate-fade-left animate-once animate-duration-300 animate-ease-out"
+-                    @click="doSaveAction"
+-                    v-if="savable && !generating"
+-                />
+-            </div>
+-            <n-collapse-transition :show="showPreview && hasContent">
+-                <div
+-                    class="bg-gray-300/60 dark:bg-gray-800/60 h-20 rounded flex-1 p-2 overflow-scroll thin-scrollbar"
+-                >
+-                    <pre>{{ contentPreview }}</pre>
+-                </div>
+-            </n-collapse-transition>
+-        </div>
+-        <div
+-            v-if="page === 'index'"
+-            class="flex-1 shrink-0 overflow-y-auto thin-scrollbar animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <div
+-                v-for="(menu, index) in menus"
+-                :id="menu.key"
+-                :key="menu.key"
+-                :class="[
+-                    'flex flex-row gap-1 justify-start items-center p-2 hover:cursor-pointer hover:bg-gray-500/10  relative',
+-                    { 'bg-gray-500/10 dark:bg-gray-500/10': focusOn === index },
+-                ]"
+-                @click="executeMenu(menu.key)"
+-            >
+-                <div class="text-gray-900 dark:text-gray-200 mx-3">
+-                    <component
+-                        :is="menu.icon"
+-                        class="size-6 inline align-sub"
+-                    />
+-                </div>
+-                <div class="flex flex-col">
+-                    <div class="text-gray-900 dark:text-gray-200">
+-                        {{ menu.label }}
+-                    </div>
+-                    <div
+-                        class="text-gray-500 text-xs line-clamp-1 overflow-ellipsis"
+-                    >
+-                        {{ menu.description }}
+-                    </div>
+-                </div>
+-                <div v-if="menu.isSub" class="absolute top-half right-2">
+-                    <SolarAltArrowRightLineDuotone class="w-4 h-4" />
+-                </div>
+-            </div>
+-        </div>
+-        <div
+-            v-else-if="page === 'calc'"
+-            class="flex-1 overflow-y-auto thin-scrollbar p-3 animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <div
+-                class="text-gray-900 dark:text-gray-200 text-lg font-bold mb-2"
+-            >
+-                统计
+-            </div>
+-            <div
+-                class="text-gray-900 dark:text-gray-400 space-y-1 grid grid-cols-2 gap-x-2"
+-            >
+-                <div>字符总数:</div>
+-                <div>{{ stats.totalChars }}</div>
+-                <div>非空字符总数:</div>
+-                <div>{{ stats.nonEmptyChars }}</div>
+-                <div>行数:</div>
+-                <div>{{ stats.totalLines }}</div>
+-                <div>非空行数:</div>
+-                <div>{{ stats.nonEmptyLines }}</div>
+-                <div>英文字母总数:</div>
+-                <div>{{ stats.totalLetters }}</div>
+-                <div>英语单词总数:</div>
+-                <div>{{ stats.totalWords }}</div>
+-                <div>非Ascii字符总数:</div>
+-                <div>{{ stats.nonAsciiChars }}</div>
+-                <div>数字总数:</div>
+-                <div>{{ stats.totalDigits }}</div>
+-                <div>标点符号总数:</div>
+-                <div>{{ stats.totalPunctuation }}</div>
+-                <div>空格总数:</div>
+-                <div>{{ stats.totalSpaces }}</div>
+-                <div>汉字总数:</div>
+-                <div>{{ stats.totalChineseChars }}</div>
+-                <div>大写字母总数:</div>
+-                <div>{{ stats.totalUppercase }}</div>
+-                <div>小写字母总数:</div>
+-                <div>{{ stats.totalLowercase }}</div>
+-                <div>最长行长度:</div>
+-                <div>{{ stats.longestLine }}</div>
+-            </div>
+-        </div>
+-        <div
+-            v-else-if="page === 'edit'"
+-            class="flex-1 animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <textarea
+-                v-model="content"
+-                v-focus
+-                class="size-full text-black dark:bg-gray-800 dark:text-gray-200 p-2 rounded resize-none thin-scrollbar edit-textarea"
+-            ></textarea>
+-        </div>
+-        <div
+-            v-else-if="
+-                page === 'tojson' || page === 'askai' || page === 'snippets-ai'
+-            "
+-            class="flex-1 shrink-0 size-full flex flex-col animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <div>
+-                <n-input
+-                    v-if="page !== 'snippets-ai'"
+-                    :disabled="generating"
+-                    v-model:value="userPrompt"
+-                    type="text"
+-                    :placeholder="
+-                        page === 'tojson'
+-                            ? '想要怎么做？'
+-                            : page === 'askai'
+-                            ? '想要问什么？'
+-                            : '想要创作什么？'
+-                    "
+-                    class="h-10 block prompt-input"
+-                />
+-                <div v-else class="p-2 line-clamp-1 overflow-ellipsis">
+-                    {{ currentSnippet.name }}
+-                </div>
+-            </div>
+-            <n-button
+-                v-if="generating"
+-                strong
+-                secondary
+-                type="error"
+-                @click="abortTask"
+-            >
+-                停止
+-            </n-button>
+-            <n-button
+-                v-else-if="
+-                    page !== 'snippets-ai' && userPrompt?.trim().length > 0
+-                "
+-                strong
+-                secondary
+-                type="info"
+-                @click="page === 'tojson' ? startConvertToJson() : startAskAI()"
+-            >
+-                生成
+-            </n-button>
+-            <template v-if="useMarkdownRender">
+-                <HijackedATag
+-                    asExternalLink
+-                    asTemplate
+-                    :html="marked.parse(asString(generatedContent)) || ''"
+-                    className="markdown-align flex-1 shrink-0 text-black dark:bg-gray-800 dark:text-gray-200 p-2 rounded thin-scrollbar overflow-y-auto"
+-                />
+-            </template>
+-            <template v-else>
+-                <textarea
+-                    :disabled="generating"
+-                    v-model="generatedContent"
+-                    class="flex-1 shrink-0 text-black dark:bg-gray-800 dark:text-gray-200 p-2 rounded resize-none thin-scrollbar"
+-                ></textarea>
+-            </template>
+-        </div>
+-        <div
+-            v-else-if="page === 'snippets'"
+-            class="flex-1 flex flex-col animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <div class="p-3">
+-                保存的AI查询片段
+-                <div class="float-end">
+-                    <n-button @click="gotoCreateSnippet">添加</n-button>
+-                </div>
+-            </div>
+-            <div v-if="config.snippets.length > 0">
+-                <div
+-                    v-for="(snippet, index) in config.snippets"
+-                    :id="snippet.id"
+-                    :key="snippet.id"
+-                    :class="[
+-                        'flex flex-col gap-1 justify-center p-2 hover:cursor-pointer hover:bg-gray-500/10 relative',
+-                        { 'bg-gray-500/10': focusOn === index },
+-                    ]"
+-                    @click="runSnippet(snippet)"
+-                >
+-                    <div class="dark:text-gray-200">
+-                        {{ snippet.name }}
+-                    </div>
+-                    <div
+-                        class="text-gray-500 text-xs line-clamp-1 overflow-ellipsis"
+-                    >
+-                        {{ snippet.prompt }}
+-                    </div>
+-                    <div class="absolute top-half right-2">
+-                        <n-button @click.stop="() => gotoEditSnippet(snippet)"
+-                            >编辑</n-button
+-                        >
+-                    </div>
+-                </div>
+-            </div>
+-            <div
+-                v-else
+-                class="size-full flex flex-col justify-center items-center gap-3"
+-            >
+-                <div class="text-xl">空空如也</div>
+-                <n-button @click="gotoCreateSnippet">添加一个</n-button>
+-            </div>
+-        </div>
+-        <div
+-            v-else-if="page === 'snippets-edit'"
+-            class="flex-1 overflow-y-auto thin-scrollbar flex flex-col gap-3 p-3 animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <div>
+-                编辑AI查询片段
+-                <div class="float-end flex flex-row gap-1">
+-                    <n-button
+-                        :disabled="!snippetFormOK"
+-                        type="error"
+-                        v-if="!currentSnippet.isNew"
+-                        @click="deleteSnippet"
+-                        >删除</n-button
+-                    >
+-                    <n-button :disabled="!snippetFormOK" @click="saveSnippet"
+-                        >保存</n-button
+-                    >
+-                </div>
+-            </div>
+-            <div>
+-                <span>名称</span>
+-                <n-input
+-                    placeholder="片段名称"
+-                    v-model:value="currentSnippet.name"
+-                ></n-input>
+-            </div>
+-            <div>
+-                <span>系统提示词</span>
+-                <n-input
+-                    type="textarea"
+-                    placeholder="角色为System的提示词，通常用于描述AI角色"
+-                    v-model:value="currentSnippet.system"
+-                ></n-input>
+-            </div>
+-            <div>
+-                <span>用户提示词</span>
+-                <n-input
+-                    type="textarea"
+-                    placeholder="角色为User的提示词，通常用于描述任务"
+-                    v-model:value="currentSnippet.prompt"
+-                ></n-input>
+-            </div>
+-            <div v-if="!currentSnippet.advanced">
+-                <div class="flex flex-row justify-between">
+-                    <div>使用新版提示词功能</div>
+-                    <n-button
+-                        size="small"
+-                        type="primary"
+-                        @click="upgradeSnippet"
+-                        >升级</n-button
+-                    >
+-                </div>
+-                <span class="opacity-50"
+-                    >新版本提示词功能不再内置模板而是完全使用用户定义的内容，并且支持使用<span
+-                        class="markdown-align"
+-                        ><code v-pre>{{
+-                            clipboard
+-                        }}</code></span
+-                    >作为剪贴板内容占位符。为了避免破坏原有提示词功能，需要手动确认升级。</span
+-                >
+-            </div>
+-            <div class="flex flex-row justify-between">
+-                <div>使用 Markdown 输出</div>
+-                <div>
+-                    <n-switch v-model:value="currentSnippet.markdown" />
+-                </div>
+-            </div>
+-        </div>
+-        <div
+-            v-else-if="page === 'chat'"
+-            class="flex-1 overflow-y-auto thin-scrollbar flex flex-col gap-3 p-3 animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <AIChat :config="config" :content="content" />
+-        </div>
+-        <div
+-            v-else-if="page === 'urls'"
+-            class="flex-1 flex flex-col animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <div class="p-3">发现的链接</div>
+-            <div>
+-                <div
+-                    v-for="(url, index) in foundUrls"
+-                    :id="'url-' + index"
+-                    :key="index"
+-                    :class="[
+-                        'flex flex-col gap-1 justify-center p-2 hover:cursor-pointer hover:bg-gray-500/10 relative',
+-                        { 'bg-gray-500/10': focusOn === index },
+-                    ]"
+-                    @click="selectUrl(url)"
+-                >
+-                    <div class="text-gray-900 dark:text-gray-200 line-clamp-1">
+-                        {{ url.slice(0, 50) }}
+-                    </div>
+-                </div>
+-            </div>
+-        </div>
+-        <div
+-            v-else-if="page === 'urls-actions'"
+-            class="flex-1 flex flex-col animate-fade-up animate-once animate-duration-500 animate-ease-out"
+-        >
+-            <div class="p-3 w-full">
+-                <div>操作链接</div>
+-                <div class="line-clamp-1 text-ellipsis text-sm text-gray-500">
+-                    {{ selectedUrl }}
+-                </div>
+-            </div>
+-            <div>
+-                <div
+-                    v-for="(menu, index) in linkMenu"
+-                    :id="menu.key"
+-                    :key="menu.key"
+-                    :class="[
+-                        'flex flex-row gap-1 justify-start items-center p-2 hover:cursor-pointer hover:bg-gray-500/10 relative',
+-                        { 'bg-gray-500/10': focusOn === index },
+-                    ]"
+-                    @click="executeLinkMenu(menu.action)"
+-                >
+-                    <div class="text-gray-900 dark:text-gray-200 mx-3">
+-                        <component
+-                            :is="menu.icon"
+-                            class="size-6 inline align-sub"
+-                        />
+-                    </div>
+-                    <div class="flex flex-col">
+-                        <div class="text-gray-900 dark:text-gray-200">
+-                            {{ menu.label }}
+-                        </div>
+-                        <div
+-                            class="text-gray-500 text-xs line-clamp-1 overflow-ellipsis"
+-                        >
+-                            {{ menu.description }}
+-                        </div>
+-                    </div>
+-                    <div v-if="menu.isSub" class="absolute top-half right-2">
+-                        <SolarAltArrowRightLineDuotone class="w-4 h-4" />
+-                    </div>
+-                </div>
+-            </div>
+-        </div>
+-        <Toast ref="toast" />
+-    </div>
+-</template>
+-
+-<style>
+-.panelroot {
+-    height: 476px;
+-    width: 400px;
+-    overflow: hidden;
++.panel-footer {
++  display: flex;
++  justify-content: space-between;
++  font-size: 12px;
++  color: rgba(255, 255, 255, 0.6);
+ }
+ </style>
+diff --git a/src/pages/Settings.vue b/src/pages/Settings.vue
+new file mode 100644
+index 0000000000000000000000000000000000000000..ee033318a0d8dbcd8c3f7f44b8f58c3b7d7303f0
+--- /dev/null
++++ b/src/pages/Settings.vue
+@@ -0,0 +1,203 @@
++<script setup lang="ts">
++import AppSidebar from "@/components/layout/AppSidebar.vue";
++import { useSettingsStore } from "@/store/settings";
++import { useHistoryStore } from "@/store/history";
++import { useMessage } from "naive-ui";
++import AppInfo from "@/AppInfo";
++
++const settings = useSettingsStore();
++const history = useHistoryStore();
++const message = useMessage();
++
++async function handleAutoLaunchChange(value: boolean) {
++  await settings.toggleAutoLaunch(value);
++  message.success(value ? "已开启开机自启" : "已关闭开机自启");
++}
++
++async function clearHistory() {
++  await history.clearHistory();
++  message.success("缓存已清理");
++}
++
++function resetAiSettings() {
++  settings.apiKey.value = "";
++  settings.apiBaseUrl.value = "https://api.openai.com";
++  settings.model.value = "gpt-4o-mini";
++  settings.temperature.value = 0.3;
++  message.success("AI 配置已重置");
++}
++</script>
++
++<template>
++  <div class="settings-page">
++    <AppSidebar />
++    <section class="main">
++      <header class="page-header">
++        <div>
++          <h1>设置</h1>
++          <p>自定义主题、快捷键与 AI 服务连接</p>
++        </div>
++      </header>
++
++      <div class="settings-grid">
++        <n-card title="主题与显示" size="small" embedded>
++          <n-radio-group v-model:value="settings.themeMode" name="theme">
++            <div class="radio-grid">
++              <n-radio value="light">浅色</n-radio>
++              <n-radio value="dark">深色</n-radio>
++              <n-radio value="system">跟随系统</n-radio>
++            </div>
++          </n-radio-group>
++          <div class="field-row">
++            <label>内容行高</label>
++            <n-slider
++              v-model:value="settings.lineHeight"
++              :step="0.1"
++              :min="1.2"
++              :max="2"
++              style="width: 200px;"
++            />
++            <span>{{ settings.lineHeight.toFixed(1) }}</span>
++          </div>
++          <div class="field-row">
++            <label>强调颜色</label>
++            <n-color-picker v-model:value="settings.accentColor" size="small" />
++          </div>
++          <div class="field-row">
++            <label>全局快捷键</label>
++            <n-input v-model:value="settings.globalShortcut" placeholder="例如 CmdOrControl+Shift+V" />
++          </div>
++        </n-card>
++
++        <n-card title="AI 服务" size="small" embedded>
++          <n-form label-placement="top" :model="settings">
++            <n-form-item label="Base URL">
++              <n-input v-model:value="settings.apiBaseUrl" placeholder="https://api.openai.com" />
++            </n-form-item>
++            <n-form-item label="API Key">
++              <n-input v-model:value="settings.apiKey" type="password" show-password-on="click" placeholder="sk-" />
++            </n-form-item>
++            <div class="field-row">
++              <n-form-item label="模型">
++                <n-input v-model:value="settings.model" placeholder="gpt-4o-mini" />
++              </n-form-item>
++              <n-form-item label="温度">
++                <n-slider
++                  v-model:value="settings.temperature"
++                  :step="0.1"
++                  :min="0"
++                  :max="1"
++                  style="width: 200px;"
++                />
++              </n-form-item>
++            </div>
++          </n-form>
++          <n-button quaternary size="tiny" @click="resetAiSettings">恢复默认</n-button>
++        </n-card>
++
++        <n-card title="系统" size="small" embedded>
++          <div class="field-row">
++            <label>开机自启</label>
++            <n-switch :value="settings.autoLaunch" @update:value="handleAutoLaunchChange" />
++          </div>
++          <div class="field-row">
++            <label>离线模式</label>
++            <n-switch v-model:value="settings.offlineMode" />
++          </div>
++          <n-divider />
++          <div class="field-row">
++            <div>
++              <strong>缓存历史</strong>
++              <p class="muted">当前共有 {{ history.items.length }} 条历史记录</p>
++            </div>
++            <n-button tertiary type="error" size="small" @click="clearHistory">清理</n-button>
++          </div>
++        </n-card>
++      </div>
++
++      <footer class="about">
++        <h3>关于 VibeClip Pro</h3>
++        <ul>
++          <li>版本 {{ AppInfo.version }}</li>
++          <li>默认全局快捷键：{{ settings.globalShortcut }}</li>
++          <li>数据保存在应用数据目录中的 SQLite 数据库</li>
++          <li>导出 JSON 格式可用于备份和跨设备迁移</li>
++        </ul>
++      </footer>
++    </section>
++  </div>
++</template>
++
++<style scoped>
++.settings-page {
++  display: flex;
++  height: 100%;
++}
++
++.main {
++  flex: 1;
++  padding: 28px 32px;
++  display: flex;
++  flex-direction: column;
++  gap: 24px;
++  overflow-y: auto;
++}
++
++.page-header h1 {
++  margin: 0;
++  font-size: 26px;
++}
++
++.page-header p {
++  margin: 6px 0 0;
++  color: var(--vibe-text-muted);
++}
++
++.settings-grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
++  gap: 18px;
++}
++
++.radio-grid {
++  display: flex;
++  gap: 16px;
++  margin-bottom: 16px;
++}
++
++.field-row {
++  display: flex;
++  align-items: center;
++  gap: 12px;
++  margin-bottom: 16px;
++  color: var(--vibe-text-primary);
++}
++
++.field-row label {
++  min-width: 80px;
++  font-weight: 600;
++}
++
++.muted {
++  margin: 4px 0 0;
++  font-size: 12px;
++  color: var(--vibe-text-muted);
++}
++
++.about {
++  padding: 18px 24px;
++  background: rgba(255, 255, 255, 0.45);
++  border-radius: var(--vibe-radius-lg);
++  border: 1px solid var(--vibe-border-soft);
++}
++
++.about h3 {
++  margin: 0 0 8px;
++}
++
++.about ul {
++  margin: 0;
++  padding-left: 18px;
++  color: var(--vibe-text-muted);
++}
++</style>
+diff --git a/src/router/index.ts b/src/router/index.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..189760c5c14349bdf6302a789f203549b585563c
+--- /dev/null
++++ b/src/router/index.ts
+@@ -0,0 +1,19 @@
++import type { RouteRecordRaw } from "vue-router";
++
++export const routes: RouteRecordRaw[] = [
++  {
++    path: "/panel",
++    name: "panel",
++    component: () => import("../pages/Panel.vue"),
++  },
++  {
++    path: "/settings",
++    name: "settings",
++    component: () => import("../pages/Settings.vue"),
++  },
++  {
++    path: "/",
++    name: "history",
++    component: () => import("../pages/History.vue"),
++  },
++];
+diff --git a/src/routes/index.ts b/src/routes/index.ts
+deleted file mode 100644
+index c03955272ebe3edbd8591340a46ae4e7de7a8cc3..0000000000000000000000000000000000000000
+--- a/src/routes/index.ts
++++ /dev/null
+@@ -1,15 +0,0 @@
+-import Home from '../pages/Home.vue';
+-import Panel from '../pages/Panel.vue';
+-
+-export const routes = [
+-    {
+-        path: '/panel',
+-        name: 'panel',
+-        component: Panel
+-    },
+-    {
+-        path: '/',
+-        name: 'home',
+-        component: Home
+-    },
+-]
+\ No newline at end of file
+diff --git a/src/store/history.ts b/src/store/history.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..eddf2aa831b53a4321f946dba29889d30feddd1d
+--- /dev/null
++++ b/src/store/history.ts
+@@ -0,0 +1,297 @@
++import { defineStore } from "pinia";
++import { computed, ref } from "vue";
++import { invoke } from "@tauri-apps/api/core";
++import { writeText } from "@tauri-apps/plugin-clipboard-manager";
++import { open, save } from "@tauri-apps/api/dialog";
++import { readTextFile, writeTextFile } from "@tauri-apps/api/fs";
++import type {
++  AiActionRequest,
++  AiActionResponse,
++  ClipItem,
++  ClipKind,
++  ClipboardDraftPayload,
++  HistoryExportPayload,
++  HistoryFilter,
++} from "@/types/history";
++import { ClipKind as ClipKindEnum } from "@/types/history";
++import { useSettingsStore } from "./settings";
++
++const HISTORY_LIMIT = 200;
++
++function normalizeClip(raw: any): ClipItem {
++  const kindNumber = Number(raw.kind ?? ClipKindEnum.Text) as ClipKind;
++  return {
++    id: raw.id,
++    kind: kindNumber,
++    content: String(raw.content ?? ""),
++    preview: raw.preview ?? raw.extra ?? null,
++    extra: raw.extra ?? null,
++    isPinned: Boolean(raw.is_pinned ?? raw.isPinned),
++    isFavorite: Boolean(raw.is_favorite ?? raw.isFavorite),
++    createdAt: raw.created_at ?? raw.createdAt ?? new Date().toISOString(),
++    updatedAt: raw.updated_at ?? raw.updatedAt ?? new Date().toISOString(),
++  };
++}
++
++function serializeClip(item: ClipItem) {
++  return {
++    id: item.id,
++    kind: item.kind,
++    content: item.content,
++    preview: item.preview ?? null,
++    extra: item.extra ?? null,
++    is_pinned: item.isPinned,
++    is_favorite: item.isFavorite,
++    created_at: item.createdAt,
++    updated_at: item.updatedAt,
++  };
++}
++
++export const useHistoryStore = defineStore("history", () => {
++  const items = ref<ClipItem[]>([]);
++  const filter = ref<HistoryFilter>("all");
++  const searchTerm = ref("");
++  const isLoading = ref(false);
++  const isExporting = ref(false);
++  const listening = ref(true);
++  const latest = ref<ClipItem | null>(null);
++  const aiBusy = ref(false);
++  let fetchTimer: number | null = null;
++
++  const settings = useSettingsStore();
++
++  const filteredItems = computed(() => {
++    const base = items.value.filter(item => {
++      switch (filter.value) {
++        case "pinned":
++          return item.isPinned;
++        case "favorites":
++          return item.isFavorite;
++        case "text":
++          return item.kind === ClipKindEnum.Text;
++        case "images":
++          return item.kind === ClipKindEnum.Image;
++        case "files":
++          return item.kind === ClipKindEnum.File;
++        default:
++          return true;
++      }
++    });
++    if (!searchTerm.value.trim()) {
++      return base;
++    }
++    const q = searchTerm.value.trim().toLowerCase();
++    return base.filter(item => {
++      const preview = item.preview ?? "";
++      return (
++        item.content.toLowerCase().includes(q) ||
++        preview.toLowerCase().includes(q) ||
++        (item.extra ?? "").toLowerCase().includes(q)
++      );
++    });
++  });
++
++  function scheduleFetch() {
++    if (fetchTimer) {
++      window.clearTimeout(fetchTimer);
++    }
++    fetchTimer = window.setTimeout(() => {
++      fetchTimer = null;
++      void refresh();
++    }, 280);
++  }
++
++  async function refresh() {
++    isLoading.value = true;
++    try {
++      const payload = await invoke<ClipItem[]>("fetch_clips", {
++        query: searchTerm.value.trim() || null,
++        favoritesFirst: filter.value === "favorites" || filter.value === "pinned",
++        limit: HISTORY_LIMIT,
++      });
++      items.value = (payload || []).map(normalizeClip);
++      if (items.value.length > 0) {
++        latest.value = items.value[0];
++      }
++    } catch (error) {
++      console.warn("Failed to load history", error);
++    } finally {
++      isLoading.value = false;
++    }
++  }
++
++  async function syncStatus() {
++    try {
++      const status = await invoke<{ listening: boolean; offline: boolean }>(
++        "get_app_status"
++      );
++      listening.value = status.listening;
++      settings.setOfflineLocal(status.offline);
++    } catch (error) {
++      console.warn("Failed to sync app status", error);
++    }
++  }
++
++  async function setListening(value: boolean) {
++    try {
++      await invoke("set_listening", { listening: value });
++      listening.value = value;
++    } catch (error) {
++      console.warn("Unable to update listening state", error);
++    }
++  }
++
++  async function insertClip(draft: ClipboardDraftPayload) {
++    if (!listening.value) {
++      return;
++    }
++    try {
++      const payload = await invoke<ClipItem>("insert_clip", { draft });
++      const clip = normalizeClip(payload);
++      items.value = [clip, ...items.value].slice(0, HISTORY_LIMIT);
++      latest.value = clip;
++    } catch (error) {
++      console.warn("Failed to insert clip", error);
++    }
++  }
++
++  async function updateFlags(id: number, data: { pinned?: boolean; favorite?: boolean }) {
++    try {
++      await invoke("update_clip_flags", {
++        id,
++        pinned: data.pinned,
++        favorite: data.favorite,
++      });
++      items.value = items.value.map(item =>
++        item.id === id
++          ? {
++              ...item,
++              isPinned: data.pinned ?? item.isPinned,
++              isFavorite: data.favorite ?? item.isFavorite,
++            }
++          : item
++      );
++    } catch (error) {
++      console.warn("Failed to update clip flags", error);
++    }
++  }
++
++  async function removeClip(id: number) {
++    try {
++      await invoke("remove_clip", { id });
++      items.value = items.value.filter(item => item.id !== id);
++    } catch (error) {
++      console.warn("Failed to remove clip", error);
++    }
++  }
++
++  async function clearHistory() {
++    try {
++      await invoke("clear_history");
++      items.value = [];
++      latest.value = null;
++    } catch (error) {
++      console.warn("Failed to clear history", error);
++    }
++  }
++
++  async function exportHistory() {
++    try {
++      isExporting.value = true;
++      const payload = await invoke<HistoryExportPayload>("export_history");
++      const target = await save({
++        title: "导出剪贴板历史",
++        defaultPath: `vibeclip-pro-history-${new Date()
++          .toISOString()
++          .replace(/[:.]/g, "-")}.json`,
++      });
++      if (!target) return;
++      await writeTextFile(target, JSON.stringify(payload, null, 2));
++    } catch (error) {
++      console.warn("Failed to export history", error);
++    } finally {
++      isExporting.value = false;
++    }
++  }
++
++  async function importHistory() {
++    try {
++      const file = await open({
++        title: "导入剪贴板历史",
++        multiple: false,
++        filters: [{ name: "JSON", extensions: ["json"] }],
++      });
++      if (!file) return;
++      const content = await readTextFile(file as string);
++      const payload = JSON.parse(content) as HistoryExportPayload;
++      const normalized = payload.items.map(serializeClip);
++      await invoke("import_history", { items: normalized });
++      await refresh();
++    } catch (error) {
++      console.warn("Failed to import history", error);
++    }
++  }
++
++  async function runAiAction(request: AiActionRequest) {
++    if (settings.offlineMode.value) {
++      throw new Error("离线模式下无法调用 AI 服务");
++    }
++    aiBusy.value = true;
++    try {
++      const response = await invoke<AiActionResponse>("perform_ai_action", request);
++      await insertClip({
++        kind: ClipKindEnum.Text,
++        text: response.result,
++        preview: response.result.slice(0, 96),
++        extra: response.used_prompt,
++      });
++      await writeText(response.result);
++      return response;
++    } finally {
++      aiBusy.value = false;
++    }
++  }
++
++  async function copyClip(item: ClipItem) {
++    if (item.kind === ClipKindEnum.Text || item.kind === ClipKindEnum.File) {
++      await writeText(item.content);
++    } else if (item.kind === ClipKindEnum.Image) {
++      await writeText("[Image copied]");
++    }
++  }
++
++  async function captureText(text: string, options?: Partial<ClipboardDraftPayload>) {
++    await insertClip({
++      kind: ClipKindEnum.Text,
++      text,
++      preview: text.slice(0, 120),
++      ...options,
++    });
++    await writeText(text);
++  }
++
++  return {
++    items,
++    filter,
++    searchTerm,
++    filteredItems,
++    isLoading,
++    isExporting,
++    listening,
++    latest,
++    aiBusy,
++    refresh,
++    scheduleFetch,
++    setListening,
++    syncStatus,
++    insertClip,
++    updateFlags,
++    removeClip,
++    clearHistory,
++    exportHistory,
++    importHistory,
++    runAiAction,
++    copyClip,
++    captureText,
++  };
++});
+diff --git a/src/store/settings.ts b/src/store/settings.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..f762db619d066ab848c2db2c2589a444489dee1d
+--- /dev/null
++++ b/src/store/settings.ts
+@@ -0,0 +1,254 @@
++import { defineStore } from "pinia";
++import { computed, reactive, ref, toRefs, watch } from "vue";
++import type { GlobalThemeOverrides } from "naive-ui";
++import { invoke } from "@tauri-apps/api/core";
++import { disable as disableAutoLaunch, enable as enableAutoLaunch, isEnabled as isAutoLaunchEnabled } from "@tauri-apps/plugin-autostart";
++
++const STORAGE_KEY = "vibeclip.settings";
++
++interface PersistedSettings {
++  themeMode: "light" | "dark" | "system";
++  accentColor: string;
++  lineHeight: number;
++  globalShortcut: string;
++  apiBaseUrl: string;
++  apiKey: string;
++  model: string;
++  temperature: number;
++  offlineMode: boolean;
++  autoLaunch: boolean;
++  preferredLanguage: string;
++}
++
++const DEFAULT_SETTINGS: PersistedSettings = {
++  themeMode: "light",
++  accentColor: "#5161ff",
++  lineHeight: 1.5,
++  globalShortcut: "CmdOrControl+Shift+V",
++  apiBaseUrl: "https://api.openai.com",
++  apiKey: "",
++  model: "gpt-4o-mini",
++  temperature: 0.3,
++  offlineMode: false,
++  autoLaunch: false,
++  preferredLanguage: "zh-CN",
++};
++
++function blend(color: string, target: string, ratio: number) {
++  const hex = color.replace("#", "");
++  const targetHex = target.replace("#", "");
++  const r = Math.round(
++    parseInt(hex.substring(0, 2), 16) * (1 - ratio) +
++      parseInt(targetHex.substring(0, 2), 16) * ratio
++  );
++  const g = Math.round(
++    parseInt(hex.substring(2, 4), 16) * (1 - ratio) +
++      parseInt(targetHex.substring(2, 4), 16) * ratio
++  );
++  const b = Math.round(
++    parseInt(hex.substring(4, 6), 16) * (1 - ratio) +
++      parseInt(targetHex.substring(4, 6), 16) * ratio
++  );
++  return `#${r.toString(16).padStart(2, "0")}${g
++    .toString(16)
++    .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
++}
++
++export const useSettingsStore = defineStore("settings", () => {
++  const state = reactive<PersistedSettings>({ ...DEFAULT_SETTINGS });
++  const initialized = ref(false);
++  const isDarkPreferred = ref(false);
++  let persistTimer: number | null = null;
++  const stateRefs = toRefs(state);
++
++  const themeClass = computed(() =>
++    stateRefs.themeMode.value === "dark" ||
++    (stateRefs.themeMode.value === "system" && isDarkPreferred.value)
++      ? "dark"
++      : ""
++  );
++
++  const naiveThemeOverrides = computed<GlobalThemeOverrides>(() => {
++    const accent = stateRefs.accentColor.value || DEFAULT_SETTINGS.accentColor;
++    const hover = blend(accent, "#ffffff", 0.2);
++    const pressed = blend(accent, "#000000", 0.18);
++    return {
++      common: {
++        primaryColor: accent,
++        primaryColorHover: hover,
++        primaryColorPressed: pressed,
++        borderRadius: "14px",
++        fontFamily: "var(--vibe-font-sans)",
++      },
++      Button: {
++        borderRadius: "var(--vibe-radius-md)",
++        colorHover: hover,
++        colorPressed: pressed,
++      },
++      Card: {
++        borderRadius: "var(--vibe-radius-lg)",
++        paddingSmall: "18px",
++        boxShadow: "var(--vibe-shadow-soft)",
++      },
++      Input: {
++        borderRadius: "var(--vibe-radius-md)",
++      },
++      Select: {
++        borderRadius: "var(--vibe-radius-md)",
++      },
++      Switch: {
++        railBorderRadius: "999px",
++      },
++    };
++  });
++
++  function applyThemeClass() {
++    document.documentElement.classList.toggle(
++      "dark",
++      themeClass.value === "dark"
++    );
++  }
++
++  function schedulePersist() {
++    if (!initialized.value) return;
++    if (persistTimer) {
++      window.clearTimeout(persistTimer);
++    }
++    persistTimer = window.setTimeout(async () => {
++      persistTimer = null;
++      try {
++        await invoke("set_value_to_store", {
++          key: STORAGE_KEY,
++          value: { ...state },
++        });
++      } catch (error) {
++        console.warn("Failed to persist settings", error);
++      }
++    }, 250);
++  }
++
++  async function loadPersisted() {
++    try {
++      const payload = await invoke<PersistedSettings>(
++        "get_value_from_store",
++        {
++          key: STORAGE_KEY,
++          fallback: { ...DEFAULT_SETTINGS },
++        }
++      );
++      Object.assign(state, { ...DEFAULT_SETTINGS, ...payload });
++    } catch (error) {
++      Object.assign(state, { ...DEFAULT_SETTINGS });
++      console.warn("Failed to load settings, falling back to defaults", error);
++    }
++  }
++
++  function listenSystemTheme() {
++    const media = window.matchMedia("(prefers-color-scheme: dark)");
++    const update = () => {
++      isDarkPreferred.value = media.matches;
++      applyThemeClass();
++    };
++    update();
++    media.addEventListener("change", update);
++  }
++
++  watch(
++    () => [stateRefs.themeMode.value, stateRefs.accentColor.value],
++    () => {
++      applyThemeClass();
++      schedulePersist();
++    },
++    { deep: true }
++  );
++
++  watch(
++    () => [
++      stateRefs.lineHeight.value,
++      stateRefs.globalShortcut.value,
++      stateRefs.apiBaseUrl.value,
++      stateRefs.apiKey.value,
++      stateRefs.model.value,
++      stateRefs.temperature.value,
++      stateRefs.preferredLanguage.value,
++      stateRefs.autoLaunch.value,
++    ],
++    () => schedulePersist(),
++    { deep: true }
++  );
++
++  watch(
++    () => stateRefs.offlineMode.value,
++    async value => {
++      schedulePersist();
++      try {
++        await invoke("set_offline", { offline: value });
++      } catch (error) {
++        console.warn("Failed to toggle offline mode", error);
++      }
++    }
++  );
++
++  watch(
++    () => stateRefs.globalShortcut.value,
++    async shortcut => {
++      if (!initialized.value) return;
++      try {
++        await invoke("register_history_shortcut", { shortcut });
++      } catch (error) {
++        console.warn("Failed to update shortcut", error);
++      }
++    }
++  );
++
++  async function bootstrap() {
++    if (initialized.value) return;
++    listenSystemTheme();
++    await loadPersisted();
++    applyThemeClass();
++    try {
++      const status = await invoke<{ offline: boolean; listening: boolean }>(
++        "get_app_status"
++      );
++      stateRefs.offlineMode.value = status.offline;
++    } catch (error) {
++      console.warn("Failed to sync app status", error);
++    }
++    try {
++      stateRefs.autoLaunch.value = await isAutoLaunchEnabled();
++    } catch (error) {
++      console.warn("Auto launch status unavailable", error);
++    }
++    initialized.value = true;
++  }
++
++  function setOfflineLocal(value: boolean) {
++    stateRefs.offlineMode.value = value;
++  }
++
++  async function toggleAutoLaunch(value: boolean) {
++    try {
++      if (value) {
++        await enableAutoLaunch();
++      } else {
++        await disableAutoLaunch();
++      }
++      stateRefs.autoLaunch.value = value;
++      schedulePersist();
++    } catch (error) {
++      console.warn("Unable to toggle auto launch", error);
++    }
++  }
++
++  return {
++    ...stateRefs,
++    themeMode: stateRefs.themeMode,
++    themeClass,
++    naiveThemeOverrides,
++    isDarkPreferred,
++    bootstrap,
++    schedulePersist,
++    setOfflineLocal,
++    toggleAutoLaunch,
++  };
++});
+diff --git a/src/styles/theme.css b/src/styles/theme.css
+new file mode 100644
+index 0000000000000000000000000000000000000000..aa8eb58325e518953b302ac0932034865e09c778
+--- /dev/null
++++ b/src/styles/theme.css
+@@ -0,0 +1,92 @@
++:root {
++  color-scheme: light;
++  --vibe-font-sans: "Inter", "HarmonyOS Sans", "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans", "Helvetica Neue", Arial, sans-serif;
++  --vibe-radius-xl: 24px;
++  --vibe-radius-lg: 18px;
++  --vibe-radius-md: 14px;
++  --vibe-radius-sm: 10px;
++  --vibe-transition: 220ms ease;
++  --vibe-accent: #5161ff;
++  --vibe-accent-strong: #1d2bf0;
++  --vibe-bg-surface: #ffffff;
++  --vibe-bg-elevated: rgba(255, 255, 255, 0.8);
++  --vibe-bg-app: linear-gradient(145deg, #f6f8ff 0%, #f5fcff 40%, #f2f5ff 100%);
++  --vibe-border-soft: rgba(76, 94, 255, 0.08);
++  --vibe-border-strong: rgba(66, 85, 255, 0.18);
++  --vibe-text-primary: #17233d;
++  --vibe-text-secondary: rgba(23, 35, 61, 0.68);
++  --vibe-text-muted: rgba(23, 35, 61, 0.38);
++  --vibe-sidebar-bg: linear-gradient(160deg, rgba(69, 93, 255, 0.92) 0%, rgba(28, 222, 210, 0.88) 100%);
++  --vibe-sidebar-text: rgba(255, 255, 255, 0.94);
++  --vibe-sidebar-muted: rgba(255, 255, 255, 0.6);
++  --vibe-shadow-soft: 0 14px 40px rgba(49, 70, 255, 0.12);
++}
++
++.dark {
++  color-scheme: dark;
++  --vibe-accent: #7ad1f5;
++  --vibe-accent-strong: #5ab7e4;
++  --vibe-bg-surface: rgba(21, 24, 38, 0.92);
++  --vibe-bg-elevated: rgba(28, 31, 48, 0.88);
++  --vibe-bg-app: linear-gradient(145deg, #141726 0%, #162437 40%, #121626 100%);
++  --vibe-border-soft: rgba(122, 209, 245, 0.12);
++  --vibe-border-strong: rgba(122, 209, 245, 0.22);
++  --vibe-text-primary: rgba(244, 249, 255, 0.96);
++  --vibe-text-secondary: rgba(244, 249, 255, 0.75);
++  --vibe-text-muted: rgba(244, 249, 255, 0.45);
++  --vibe-sidebar-bg: linear-gradient(160deg, rgba(42, 56, 172, 0.94) 0%, rgba(16, 180, 198, 0.9) 100%);
++  --vibe-sidebar-text: rgba(244, 249, 255, 0.96);
++  --vibe-sidebar-muted: rgba(244, 249, 255, 0.68);
++  --vibe-shadow-soft: 0 16px 48px rgba(13, 23, 45, 0.6);
++}
++
++html,
++body {
++  height: 100%;
++  width: 100%;
++  margin: 0;
++  padding: 0;
++  font-family: var(--vibe-font-sans);
++  background: var(--vibe-bg-app);
++  color: var(--vibe-text-primary);
++  transition: background 320ms ease, color var(--vibe-transition);
++}
++
++body::before {
++  content: "";
++  position: fixed;
++  inset: 0;
++  pointer-events: none;
++  background: radial-gradient(60% 60% at 20% 20%, rgba(81, 97, 255, 0.18), transparent 60%),
++    radial-gradient(50% 50% at 80% 10%, rgba(47, 210, 209, 0.14), transparent 65%),
++    radial-gradient(40% 40% at 60% 80%, rgba(90, 71, 255, 0.1), transparent 70%);
++  opacity: 0.65;
++  z-index: -1;
++}
++
++#app {
++  height: 100%;
++  width: 100%;
++}
++
++.app-shell {
++  display: flex;
++  height: 100%;
++  width: 100%;
++  position: relative;
++  backdrop-filter: blur(24px) saturate(140%);
++}
++
++.n-config-provider {
++  height: 100%;
++}
++
++.fade-enter-active,
++.fade-leave-active {
++  transition: opacity var(--vibe-transition);
++}
++
++.fade-enter-from,
++.fade-leave-to {
++  opacity: 0;
++}
+diff --git a/src/types/history.ts b/src/types/history.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..16b6c824017fc99630817d9d9a360cdbd1c98846
+--- /dev/null
++++ b/src/types/history.ts
+@@ -0,0 +1,65 @@
++export enum ClipKind {
++  Text = 1,
++  Image = 2,
++  File = 3,
++}
++
++export interface ClipItem {
++  id: number;
++  kind: ClipKind;
++  content: string;
++  preview?: string | null;
++  extra?: string | null;
++  isPinned: boolean;
++  isFavorite: boolean;
++  createdAt: string;
++  updatedAt: string;
++}
++
++export interface ClipboardDraftPayload {
++  kind: ClipKind;
++  text?: string;
++  imageBase64?: string;
++  filePath?: string;
++  preview?: string;
++  extra?: string;
++  isPinned?: boolean;
++  isFavorite?: boolean;
++}
++
++export type HistoryFilter =
++  | "all"
++  | "pinned"
++  | "favorites"
++  | "text"
++  | "images"
++  | "files";
++
++export type AiActionKind =
++  | "translate"
++  | "summarize"
++  | "polish"
++  | "jsonify"
++  | "custom";
++
++export interface AiActionRequest {
++  action: AiActionKind;
++  input: string;
++  language?: string;
++  customPrompt?: string;
++  apiKey: string;
++  baseUrl: string;
++  model?: string;
++  temperature?: number;
++}
++
++export interface AiActionResponse {
++  result: string;
++  used_prompt: string;
++  finished_at: string;
++}
++
++export interface HistoryExportPayload {
++  exported_at: number;
++  items: ClipItem[];
++}
